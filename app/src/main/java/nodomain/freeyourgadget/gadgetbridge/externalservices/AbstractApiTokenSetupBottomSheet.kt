@@ -25,11 +25,13 @@ import android.widget.EditText
 import android.widget.Toast
 import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
+import androidx.core.content.edit
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.util.GB
 
@@ -44,11 +46,18 @@ import nodomain.freeyourgadget.gadgetbridge.util.GB
 abstract class AbstractApiTokenSetupBottomSheet(
     @param:LayoutRes private val layoutRes: Int,
     @param:IdRes private val apiTokenViewId: Int,
+    /** Field holding the address of the user's instance, absent for a hosted service. */
+    @param:IdRes private val serverViewId: Int? = null,
 ) : BottomSheetDialogFragment() {
     /** The service being set up. */
     protected abstract val service: ExternalService
 
-    /** Looks up and fills in whatever fields the service owns beyond the token. */
+    private var serverInput: EditText? = null
+
+    /** Address the user typed, empty for a service hosted at one address. */
+    protected val serverName: String get() = serverInput?.text?.toString()?.trim().orEmpty()
+
+    /** Looks up and fills in whatever fields the service owns beyond the token and the server. */
     protected open fun onViewsBound(view: View) {}
 
     /**
@@ -75,6 +84,11 @@ abstract class AbstractApiTokenSetupBottomSheet(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        serverViewId?.let { id ->
+            serverInput = view.findViewById<EditText>(id).apply {
+                setText(service.serverUrl().orEmpty())
+            }
+        }
         onViewsBound(view)
 
         val apiTokenInput = view.findViewById<EditText>(apiTokenViewId)
@@ -100,6 +114,9 @@ abstract class AbstractApiTokenSetupBottomSheet(
                         GB.ERROR
                     )
                     return@launch
+                }
+                service.serverPrefKey?.let { key ->
+                    GBApplication.getPrefs().preferences.edit { putString(key, serverName) }
                 }
                 onTokenAccepted(apiToken)
                 parentFragmentManager.setFragmentResult(
