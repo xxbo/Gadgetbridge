@@ -45,7 +45,6 @@ object EndurainService : WorkoutUploadTarget {
     override val authStyle = AuthStyle.LOGIN
 
     override val service = WorkoutUploadStore.SERVICE_ENDURAIN
-    override val uploadMenuItemRes = R.id.activity_action_upload_to_endurain
 
     override val capabilities = UploadCapabilities(
         // A FIT can be synthesized from the summary alone, so a trackless workout still uploads.

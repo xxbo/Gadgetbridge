@@ -17,7 +17,6 @@
 package nodomain.freeyourgadget.gadgetbridge.activities.workouts
 
 import android.content.Context
-import androidx.annotation.IdRes
 import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummary
 import nodomain.freeyourgadget.gadgetbridge.entities.WorkoutUpload
@@ -128,10 +127,6 @@ interface WorkoutUploadTarget : ExternalService {
      * [WorkoutUploadStore] before choosing one.
      */
     val service: Int
-
-    /** Menu item that uploads the workout on screen to this service. */
-    @get:IdRes
-    val uploadMenuItemRes: Int
 
     /** What this service accepts, and what it can still change once it holds an activity. */
     val capabilities: UploadCapabilities

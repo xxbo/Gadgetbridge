@@ -41,7 +41,6 @@ object WandererService : WorkoutUploadTarget {
     override val authStyle = AuthStyle.API_TOKEN
 
     override val service = WorkoutUploadStore.SERVICE_WANDERER
-    override val uploadMenuItemRes = R.id.activity_action_upload_to_wanderer
 
     override val capabilities = UploadCapabilities(
         // Wanderer stores trails, so there is nothing to upload without a track.

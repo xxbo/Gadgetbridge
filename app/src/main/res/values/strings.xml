@@ -5613,6 +5613,9 @@
     <string name="prefs_online_fitness_trackers_summary">Configure how to reach and use online fitness trackers</string>
     <string name="warning_network_required_title">Network required</string>
     <string name="warning_network_required_summary">These integrations requires network connectivity. Please install and enable the internet helper add-on app.</string>
+    <string name="activity_detail_upload_to">Upload to…</string>
+    <string name="activity_detail_upload_to_all">All services</string>
+    <!-- %1$s is the name of an online fitness tracker -->
     <string name="workout_upload_status_track_change_declined">The track changed, but replacing the activity on %1$s is turned off</string>
     <!-- %1$s in the pref_service_* strings is the name of an online fitness tracker -->
     <string name="pref_service_status_title">%1$s status</string>
