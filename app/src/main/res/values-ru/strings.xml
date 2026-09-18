@@ -4641,7 +4641,6 @@
     <string name="endurain_uploading_started">Загрузка в Endurain…</string>
     <string name="endurain_successfully_uploaded_toast">Успешно загружено в Endurain</string>
     <string name="endurain_error_while_uploading_toast">Ошибка при загрузке в Endurain</string>
-    <string name="endurain_unable_to_upload_gpx_file_toast">Не удалось загрузить файл активности в Endurain: %1$s</string>
     <string name="endurain_setup_title">Настройка Endurain</string>
     <string name="endurain_setup_server">Сервер Endurain</string>
     <string name="endurain_setup_login_type_local">Локальный</string>

@@ -4424,7 +4424,6 @@
     <string name="unable_to_share_gpx_track_toast">Nem sikerült megosztani a GPX-nyomvonalat: %1$s</string>
     <string name="endurain_successfully_uploaded_toast">Sikeresen feltöltve az Endurainbe</string>
     <string name="endurain_error_while_uploading_toast">Hiba történt az Endurainbe történő feltöltéskor</string>
-    <string name="endurain_unable_to_upload_gpx_file_toast">Nem sikerült feltölteni a tevékenységfájlt az Endurainbe: %1$s</string>
     <string name="endurain_setup_title">Endurain beállítása</string>
     <string name="endurain_setup_server">Endurain kiszolgáló</string>
     <string name="endurain_setup_login_type_local">Helyi</string>

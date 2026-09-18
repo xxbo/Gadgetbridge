@@ -4577,7 +4577,6 @@
     <string name="unable_to_share_gpx_track_toast">无法分享 GPX 轨迹：%1$s</string>
     <string name="endurain_successfully_uploaded_toast">成功上传到 Endurian</string>
     <string name="endurain_error_while_uploading_toast">上传到 Endurian 时出错</string>
-    <string name="endurain_unable_to_upload_gpx_file_toast">无法上传活动文件到 Endurian：%1$s</string>
     <string name="endurain_setup_title">Endurian 设置</string>
     <string name="endurain_setup_server">Endurian 服务器</string>
     <string name="endurain_setup_login_type_local">本地</string>

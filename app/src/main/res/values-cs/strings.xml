@@ -4606,7 +4606,6 @@
     <string name="unable_to_share_gpx_track_toast">Nepodařilo se sdílet stopu GPX: %1$s</string>
     <string name="endurain_successfully_uploaded_toast">Úspěšně nahráno na Endurain</string>
     <string name="endurain_error_while_uploading_toast">Chyba při nahrávání na Endurain</string>
-    <string name="endurain_unable_to_upload_gpx_file_toast">Nepodařilo se nahrát soubor aktivity na Endurain: %1$s</string>
     <string name="endurain_setup_title">Nastavení Endurain</string>
     <string name="endurain_setup_server">Server Endurain</string>
     <string name="endurain_setup_login_type_local">Místní</string>

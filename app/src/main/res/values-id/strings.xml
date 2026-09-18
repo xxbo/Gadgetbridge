@@ -4601,7 +4601,6 @@
     <string name="unable_to_share_gpx_track_toast">Tidak dapat membagikan trek GPX: %1$s</string>
     <string name="endurain_successfully_uploaded_toast">Berhasil diunggah ke Endurain</string>
     <string name="endurain_error_while_uploading_toast">Kesalahan saat mengunggah ke Endurain</string>
-    <string name="endurain_unable_to_upload_gpx_file_toast">Tidak dapat mengunggah file aktivitas ke Endurain: %1$s</string>
     <string name="endurain_setup_title">Pengaturan Endurain</string>
     <string name="endurain_setup_server">Server Endurain</string>
     <string name="endurain_setup_login_type_local">Lokal</string>

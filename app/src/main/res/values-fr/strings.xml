@@ -4508,7 +4508,6 @@
     <string name="no_activity_track_in_activity_toast">Aucun suivi d’activité dans cette activité</string>
     <string name="endurain_successfully_uploaded_toast">Téléversé avec succès vers Endurain</string>
     <string name="endurain_error_while_uploading_toast">Erreur lors téléversement vers Endurain</string>
-    <string name="endurain_unable_to_upload_gpx_file_toast">Impossible de téléverser le fichier d’activité vers Endurain : %1$s</string>
     <string name="endurain_setup_title">Configuration d’Endurain</string>
     <string name="activity_detail_upload_to_endurain">Téléverser dans Endurain</string>
     <string name="goals">Objectifs</string>

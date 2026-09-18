@@ -4452,7 +4452,6 @@
     <string name="unable_to_share_gpx_track_toast">No se pudo compartir la ruta GPX: %1$s</string>
     <string name="endurain_successfully_uploaded_toast">Subido correctamente a Endurain</string>
     <string name="endurain_error_while_uploading_toast">Error al subir a Endurain</string>
-    <string name="endurain_unable_to_upload_gpx_file_toast">No se pudo subir el archivo de actividad a Endurain: %1$s</string>
     <string name="endurain_setup_title">Configuración de Endurain</string>
     <string name="endurain_setup_server">Servidor de Endurain</string>
     <string name="endurain_setup_login_type_local">Local</string>

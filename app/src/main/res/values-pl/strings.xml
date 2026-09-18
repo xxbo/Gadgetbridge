@@ -4518,7 +4518,6 @@
     <string name="unable_to_share_gpx_track_toast">Nie można udostępnić śladu GPX: %1$s</string>
     <string name="endurain_successfully_uploaded_toast">Pomyślnie przesłano do Endurain</string>
     <string name="endurain_error_while_uploading_toast">Błąd podczas przesyłania do Endurain</string>
-    <string name="endurain_unable_to_upload_gpx_file_toast">Nie można przesłać pliku aktywności do Endurain: %1$s</string>
     <string name="endurain_setup_title">Konfiguracja Endurain</string>
     <string name="endurain_setup_server">Serwer Endurain</string>
     <string name="endurain_setup_login_type_local">Lokalny</string>
