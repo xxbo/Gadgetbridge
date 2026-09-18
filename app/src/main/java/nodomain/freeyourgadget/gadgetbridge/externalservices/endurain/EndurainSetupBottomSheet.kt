@@ -106,7 +106,7 @@ class EndurainSetupBottomSheet : BottomSheetDialogFragment() {
         progress = view.findViewById(R.id.progress)
         next = view.findViewById(R.id.next_button)
 
-        serverInput.setText(prefs.getString("endurain_server", ""))
+        serverInput.setText(EndurainService.serverUrl().orEmpty())
 
         // Register broadcast receiver for SSO callbacks
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
@@ -236,7 +236,7 @@ class EndurainSetupBottomSheet : BottomSheetDialogFragment() {
         serverLayout.error = null
         val server = "${uri.scheme}://${uri.host}${if (uri.port > 0) ":${uri.port}" else ""}"
         vm.server = server
-        prefs.edit { putString("endurain_server", server) }
+        prefs.edit { putString(EndurainService.serverPrefKey, server) }
 
         showProgress(true)
         vm.fetchServerCapabilities(server) { ok, reason ->

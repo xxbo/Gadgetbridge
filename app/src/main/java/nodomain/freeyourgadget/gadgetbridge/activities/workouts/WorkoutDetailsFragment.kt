@@ -711,7 +711,7 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
             when (outcome) {
                 is WorkoutUploader.SyncOutcome.Uploaded -> {
                     uploadStateChanged()
-                    GB.toast(getString(target.uploadedRes), Toast.LENGTH_SHORT, GB.INFO)
+                    GB.toast(target.uploadedMessage(context), Toast.LENGTH_SHORT, GB.INFO)
                 }
 
                 is WorkoutUploader.SyncOutcome.Resynced -> {

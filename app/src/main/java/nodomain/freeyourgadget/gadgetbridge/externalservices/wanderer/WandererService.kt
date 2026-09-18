@@ -29,6 +29,10 @@ import nodomain.freeyourgadget.gadgetbridge.activities.workouts.WorkoutUploader
 import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummary
 import nodomain.freeyourgadget.gadgetbridge.entities.WorkoutUpload
 import nodomain.freeyourgadget.gadgetbridge.externalservices.AuthStyle
+import nodomain.freeyourgadget.gadgetbridge.externalservices.ExternalServiceCalls
+import nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryData
+import nodomain.freeyourgadget.gadgetbridge.model.ActivitySummaryEntries
+import org.slf4j.LoggerFactory
 import java.io.File
 
 object WandererService : WorkoutUploadTarget {
@@ -69,16 +73,6 @@ object WandererService : WorkoutUploadTarget {
         return true
     }
 
-    override fun failureMessage(context: Context, reason: String): String =
-        context.getString(R.string.auto_upload_failed_wanderer, reason)
-
-    override val uploadedRes = R.string.wanderer_toast_successfully_uploaded
-
-    override fun uploadFailedMessage(context: Context, reason: String?): String =
-        context.getString(
-            R.string.wanderer_toast_upload_error,
-            reason ?: context.getString(R.string.unknown_error)
-        )
 
     /**
      * A trail page is namespaced by the handle of the account that owns it, and a handle that does
@@ -91,8 +85,24 @@ object WandererService : WorkoutUploadTarget {
         return "${server.trimEnd('/')}/trail/view/@$handle/$remoteActivityId"
     }
 
-    override fun upload(context: Context, summary: BaseActivitySummary, payload: File) =
-        WorkoutUploader.uploadToWandererBlocking(context, payload)
+    override fun upload(
+        context: Context,
+        summary: BaseActivitySummary,
+        payload: File
+    ): WorkoutUploader.UploadResult {
+        val server = serverUrl()
+            ?: return WorkoutUploader.UploadResult(false, null, null)
+        return WorkoutUploader.awaitUpload(context) { done ->
+            WandererApiClient(server, WandererTokenManager(context)).uploadActivity(payload) { newId, message ->
+                if (newId != null && message == null) {
+                    LOG.info("Uploaded GPX to Wanderer, ID {}", newId)
+                    done(WorkoutUploader.UploadResult(true, newId, null))
+                } else {
+                    done(WorkoutUploader.UploadResult(false, null, message))
+                }
+            }
+        }
+    }
 
     override fun updateTrack(
         context: Context,
@@ -100,10 +110,47 @@ object WandererService : WorkoutUploadTarget {
         payload: File,
         summary: BaseActivitySummary,
         row: WorkoutUpload
-    ): TrackUpdateResult =
-        if (WorkoutUploader.updateWandererTrackBlocking(context, remoteActivityId, payload, summary)) {
-            TrackUpdateResult.Updated
-        } else {
-            TrackUpdateResult.Failed
+    ): TrackUpdateResult {
+        val server = serverUrl() ?: return TrackUpdateResult.Failed
+        val updated = ExternalServiceCalls.await<Boolean>(WorkoutUploader.DEFAULT_UPLOAD_TIMEOUT_SECONDS) { done ->
+            WandererApiClient(server, WandererTokenManager(context))
+                .updateActivityFile(remoteActivityId, payload, statsOf(summary)) { ok, reason ->
+                    if (!ok) {
+                        LOG.warn("Wanderer track update failed for trail {}: {}", remoteActivityId, reason)
+                    }
+                    done(ok)
+                }
         }
+        return if (updated == true) TrackUpdateResult.Updated else TrackUpdateResult.Failed
+    }
+
+    /**
+     * Trail statistics to send alongside a replacement track, since Wanderer stores the new file
+     * without re-deriving them. Values come from the workout summary, which is the authority on
+     * them anyway. Entries whose value the summary does not carry are left out, so the trail
+     * keeps what it had.
+     */
+    private fun statsOf(summary: BaseActivitySummary): Map<String, String> {
+        val data = summary.summaryData?.let {
+            try {
+                ActivitySummaryData.fromJson(it)
+            } catch (e: Exception) {
+                LOG.warn("Failed to parse stored summary data for summary {}", summary.id, e)
+                null
+            }
+        } ?: return emptyMap()
+
+        val stats = mutableMapOf<String, String>()
+        data.getNumber(ActivitySummaryEntries.DISTANCE_METERS, null)
+            ?.let { stats["distance"] = it.toString() }
+        data.getNumber(ActivitySummaryEntries.ACTIVE_SECONDS, null)
+            ?.let { stats["duration"] = it.toString() }
+        data.getNumber(ActivitySummaryEntries.ELEVATION_GAIN, null)
+            ?.let { stats["elevation_gain"] = it.toString() }
+        data.getNumber(ActivitySummaryEntries.ELEVATION_LOSS, null)
+            ?.let { stats["elevation_loss"] = it.toString() }
+        return stats
+    }
+
+    private val LOG = LoggerFactory.getLogger(WandererService::class.java)
 }

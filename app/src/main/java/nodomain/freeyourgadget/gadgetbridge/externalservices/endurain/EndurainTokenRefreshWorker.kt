@@ -35,7 +35,7 @@ class EndurainTokenRefreshWorker (
 
         // Refresh tokens if possible
         val tokenManager = EndurainTokenManager(applicationContext)
-        val serverUrl = GBApplication.getPrefs().preferences.getString("endurain_server", null)
+        val serverUrl = EndurainService.serverUrl()
         if (serverUrl != null && tokenManager.isLoggedIn()) {
             tokenManager.performTokenRefresh(serverUrl) {}
         }

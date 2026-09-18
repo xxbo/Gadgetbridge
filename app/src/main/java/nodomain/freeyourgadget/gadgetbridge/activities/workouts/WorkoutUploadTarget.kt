@@ -18,7 +18,7 @@ package nodomain.freeyourgadget.gadgetbridge.activities.workouts
 
 import android.content.Context
 import androidx.annotation.IdRes
-import androidx.annotation.StringRes
+import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummary
 import nodomain.freeyourgadget.gadgetbridge.entities.WorkoutUpload
 import nodomain.freeyourgadget.gadgetbridge.externalservices.ExternalService
@@ -146,18 +146,18 @@ interface WorkoutUploadTarget : ExternalService {
     /** Whether the user asked for workouts to be uploaded to this service automatically. */
     fun isAutoUploadEnabled(prefs: GBPrefs): Boolean = prefs.getBoolean(autoUploadPrefKey, false)
 
-    /** Localized "upload to this service failed: %s" message, for the auto-upload notification. */
-    fun failureMessage(context: Context, reason: String): String
-
     /** Localized confirmation that this service took the workout. */
-    @get:StringRes
-    val uploadedRes: Int
+    fun uploadedMessage(context: Context): String =
+        context.getString(R.string.service_upload_succeeded, context.getString(nameRes))
 
     /**
-     * Localized "the upload to this service failed" message for an upload the user asked for,
-     * carrying [reason] when the service gave one.
+     * Localized "the upload to this service failed" message, carrying [reason] when the service
+     * gave one. Used both for the toast after an upload the user asked for and for the
+     * notification an auto-upload failure raises.
      */
-    fun uploadFailedMessage(context: Context, reason: String?): String
+    fun uploadFailedMessage(context: Context, reason: String?): String =
+        reason?.let { context.getString(R.string.service_upload_failed, context.getString(nameRes), it) }
+            ?: context.getString(R.string.service_upload_failed_generic, context.getString(nameRes))
 
     /**
      * Web address of the activity [remoteActivityId] on the service, for opening it in a browser,

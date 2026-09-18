@@ -4379,9 +4379,7 @@
     <string name="endurain_setup_server">Serveur Endurain</string>
     <string name="endurain_setup_login_type_local">Local</string>
     <string name="endurain_setup_login_type_sso">SSO</string>
-    <string name="wanderer_unable_to_upload_gpx_file_toast">Échec de l\'envoi du fichier GPX à Wanderer : %1$s</string>
     <string name="pref_wanderer_status_title">Statut Wanderer</string>
-    <string name="activity_detail_upload_to_wanderer">Envoyer GPX à Wanderer</string>
     <string name="activity_type_cycling_downhill">Descente</string>
     <string name="generic_metrics">Autre</string>
     <string name="generic_metric_select_metric">Métrique</string>
@@ -4462,7 +4460,6 @@
     <string name="pref_soundcore_fit_test_result">Test d\'ajustement - Gauche : %1$s, Droite : %2$s</string>
     <string name="pref_soundcore_fit_test_excellent_seal">Excellente étanchéité</string>
     <string name="pref_soundcore_fit_test_poor_seal">Ajustez ou essayez un autre embout</string>
-    <string name="endurain_uploading_started">Envoi à Endurain…</string>
     <string name="xiaomi_vibration_patterns_empty">Pas de réglages de vibrations trouvés sur l\'appareil. Ils sont lus lors de la connexion de l\'appareil.</string>
     <string name="xiaomi_vibration_section_types">Types de notifications</string>
     <string name="xiaomi_vibration_default">Par défaut</string>
@@ -4506,10 +4503,7 @@
     <string name="endurain_select_identity_provider">Sélection fournisseur d’identité</string>
     <string name="warning_network_required_summary">Ces intégrations nécessitent une connectivité réseau. Veuillez installer et activer l’app complémentaire d’assistance Internet.</string>
     <string name="no_activity_track_in_activity_toast">Aucun suivi d’activité dans cette activité</string>
-    <string name="endurain_successfully_uploaded_toast">Téléversé avec succès vers Endurain</string>
-    <string name="endurain_error_while_uploading_toast">Erreur lors téléversement vers Endurain</string>
     <string name="endurain_setup_title">Configuration d’Endurain</string>
-    <string name="activity_detail_upload_to_endurain">Téléverser dans Endurain</string>
     <string name="goals">Objectifs</string>
     <string name="authentication_settings">Paramètres d\'authentification</string>
     <string name="casio_interval_timer_repeat">Autorépétition</string>
@@ -4541,8 +4535,6 @@
     <string name="endurain_logged_in_refresh_token">Connecté à %1$s\nLe jeton d’actualisation expire : %2$s</string>
     <string name="endurain_logout_failed">La déconnexion a échoué</string>
     <string name="wanderer_logged_in">Connecté à %s</string>
-    <string name="wanderer_toast_successfully_uploaded">Téléversé avec succès vers Wanderer</string>
-    <string name="wanderer_toast_upload_error">Erreur de téléversement Wanderer : %1$s</string>
     <string name="select_at_least_option">Veuillez sélectionner au moins l’option %1$d</string>
     <string name="activity_summary_set_header_photo_title">Définir photo d’en-tête</string>
     <string name="activity_summary_remove_header_photo_title">Retirer photo d’en-tête</string>

@@ -4516,21 +4516,15 @@
     <string name="no_activity_track_in_activity_toast">Brak śladu aktywności w tej aktywności</string>
     <string name="unable_to_display_gpx_track_toast">Nie można wyświetlić śladu GPX: %1$s</string>
     <string name="unable_to_share_gpx_track_toast">Nie można udostępnić śladu GPX: %1$s</string>
-    <string name="endurain_successfully_uploaded_toast">Pomyślnie przesłano do Endurain</string>
-    <string name="endurain_error_while_uploading_toast">Błąd podczas przesyłania do Endurain</string>
     <string name="endurain_setup_title">Konfiguracja Endurain</string>
     <string name="endurain_setup_server">Serwer Endurain</string>
     <string name="endurain_setup_login_type_local">Lokalny</string>
     <string name="endurain_setup_login_type_sso">Jednorazowe logowanie</string>
     <string name="endurain_setup_mfa_code">Kod MFA</string>
     <string name="endurain_setup_next">Dalej</string>
-    <string name="activity_detail_upload_to_endurain">Prześlij do Endurain</string>
     <string name="wanderer_logged_in">Zalogowano do %s</string>
     <string name="wanderer_setup_api_token_error">Token API powinien zaczynać się od wanderer_key_</string>
     <string name="wanderer_setup_missing_information">Proszę wypełnić oba pola</string>
-    <string name="wanderer_toast_successfully_uploaded">Pomyślnie przesłano do Wanderer</string>
-    <string name="wanderer_toast_upload_error">Błąd przesyłania do Wanderer: %1$s</string>
-    <string name="wanderer_unable_to_upload_gpx_file_toast">Nie można przesłać pliku GPX do Wanderer: %1$s</string>
     <string name="pref_wanderer_status_title">Status Wanderer</string>
     <string name="pref_wanderer_enter_api_token_title">Wprowadź token API Wanderer</string>
     <string name="pref_title_third_party_app_device_alarms">Zezwalaj aplikacjom innych firm na ustawianie alarmów</string>
@@ -4629,7 +4623,6 @@
     <string name="endurain_mfa_verification_failed">Weryfikacja MFA niepowiodła się</string>
     <string name="pref_wanderer_enter_api_token_summary">Kliknij tutaj, aby wprowadzić serwer Wanderer i token API</string>
     <string name="pref_wanderer_log_out_title">Wyloguj się z Wanderer</string>
-    <string name="activity_detail_upload_to_wanderer">Prześlij GPX do Wanderera</string>
     <string name="select_at_least_option">Proszę wybrać co najmniej %1$d opcję</string>
     <string name="goals">Cele</string>
     <string name="predictions">Prognozy</string>
@@ -4752,7 +4745,6 @@
     <string name="xiaomi_vibration_segment_strength_hint">Siła (1-100)</string>
     <string name="xiaomi_vibration_segment_remove">Usuń segment</string>
     <string name="xiaomi_vibration_no_segments">Dodaj co najmniej jeden segment</string>
-    <string name="endurain_uploading_started">Przesyłanie do Endurain…</string>
     <string name="activity_summary_set_header_photo_title">Ustaw zdjęcie w nagłówku</string>
     <string name="activity_summary_remove_header_photo_title">Usuń zdjęcie z nagłówka</string>
     <string name="authentication_settings">Ustawienia uwierzytelniania</string>

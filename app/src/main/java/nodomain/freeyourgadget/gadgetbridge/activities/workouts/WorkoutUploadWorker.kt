@@ -152,7 +152,7 @@ class WorkoutUploadWorker(
             notifyFailure(
                 context,
                 target.failureNotificationId,
-                target.failureMessage(context, reason)
+                target.uploadFailedMessage(context, reason)
             )
         }
         return result
