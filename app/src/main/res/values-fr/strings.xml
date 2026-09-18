@@ -4368,8 +4368,8 @@
     <string name="endurain_login_successful">Connexion réussie</string>
     <string name="endurain_login_failed">Échec de connexion</string>
     <string name="endurain_oauth_completing_login">Connexion en cours…</string>
-    <string name="endurain_not_logged_in_integration_disabled">Non connecté, intégration désactivée</string>
-    <string name="endurain_logged_out_successfully">Déconnexion réussie</string>
+    <string name="service_not_logged_in">Non connecté, intégration désactivée</string>
+    <string name="service_logged_out">Déconnexion réussie</string>
     <string name="warning_network_required_title">Un réseau est nécessaire</string>
     <string name="pref_endurain_log_in_title">Se connecter à Endurain</string>
     <string name="pref_endurain_log_in_summary">Touchez ici pour vous connecter au serveur Endurain</string>
@@ -4533,8 +4533,8 @@
     <string name="sinilink_prompt_tone">Tonalité d\'invite</string>
     <string name="endurain_sso_login_successful">Connexion SSO réussie</string>
     <string name="endurain_logged_in_refresh_token">Connecté à %1$s\nLe jeton d’actualisation expire : %2$s</string>
-    <string name="endurain_logout_failed">La déconnexion a échoué</string>
-    <string name="wanderer_logged_in">Connecté à %s</string>
+    <string name="service_logout_failed">La déconnexion a échoué</string>
+    <string name="service_logged_in_to">Connecté à %s</string>
     <string name="select_at_least_option">Veuillez sélectionner au moins l’option %1$d</string>
     <string name="activity_summary_set_header_photo_title">Définir photo d’en-tête</string>
     <string name="activity_summary_remove_header_photo_title">Retirer photo d’en-tête</string>

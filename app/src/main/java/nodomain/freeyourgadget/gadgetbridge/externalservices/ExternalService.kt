@@ -86,8 +86,15 @@ interface ExternalService {
     fun isConfigured(context: Context): Boolean =
         (serverPrefKey == null || serverUrl() != null) && isLoggedIn(context)
 
-    /** One line saying where the user stands with this service, for its settings rows. */
-    fun statusSummary(context: Context): CharSequence
+    /**
+     * One line saying where the user stands with this service, for its settings rows. Names the
+     * instance for a self-hosted service, since the user may have more than one in mind.
+     */
+    fun statusSummary(context: Context): CharSequence = when {
+        !isConfigured(context) -> context.getString(R.string.service_not_logged_in)
+        serverUrl() != null -> context.getString(R.string.service_logged_in_to, serverUrl())
+        else -> context.getString(R.string.service_logged_in)
+    }
 
     /** Shows this service's setup UI, which reports back on [externalServiceLoginResultKey]. */
     fun showSetup(fragment: Fragment)

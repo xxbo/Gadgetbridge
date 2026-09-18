@@ -76,7 +76,7 @@ object EndurainService : WorkoutUploadTarget {
                 DateTimeUtils.parseTimeStamp(tokenManager.getRefreshTokenExpiresAt())
             )
         } else {
-            context.getString(R.string.endurain_not_logged_in_integration_disabled)
+            context.getString(R.string.service_not_logged_in)
         }
         serverVersion?.let { summary += context.getString(R.string.endurain_server_version, it) }
         return summary

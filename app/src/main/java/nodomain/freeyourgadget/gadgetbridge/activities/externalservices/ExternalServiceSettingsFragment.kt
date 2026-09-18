@@ -106,9 +106,9 @@ class ExternalServiceSettingsFragment : AbstractPreferenceFragment() {
             val context = requireContext()
             val success = withContext(Dispatchers.IO) { service.logout(context) }
             if (success) {
-                GB.toast(getString(R.string.endurain_logged_out_successfully), Toast.LENGTH_SHORT, GB.INFO)
+                GB.toast(getString(R.string.service_logged_out), Toast.LENGTH_SHORT, GB.INFO)
             } else {
-                GB.toast(getString(R.string.endurain_logout_failed), Toast.LENGTH_SHORT, GB.WARN)
+                GB.toast(getString(R.string.service_logout_failed), Toast.LENGTH_SHORT, GB.WARN)
             }
             refresh()
         }

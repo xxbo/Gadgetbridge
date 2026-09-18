@@ -55,13 +55,6 @@ object WandererService : WorkoutUploadTarget {
 
     override fun isLoggedIn(context: Context) = WandererTokenManager(context).isLoggedIn()
 
-    override fun statusSummary(context: Context): CharSequence =
-        if (isConfigured(context)) {
-            context.getString(R.string.wanderer_logged_in, serverUrl())
-        } else {
-            context.getString(R.string.endurain_not_logged_in_integration_disabled)
-        }
-
     override fun showSetup(fragment: Fragment) {
         WandererSetupBottomSheet().show(fragment.parentFragmentManager, "wanderer_setup")
     }

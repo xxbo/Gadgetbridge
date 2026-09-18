@@ -4557,11 +4557,11 @@
     <string name="endurain_select_identity_provider">选择身份提供方</string>
     <string name="endurain_invalid_oauth_callback">无效的 OAuth 调用</string>
     <string name="endurain_oauth_completing_login">正在完成登录…</string>
-    <string name="endurain_not_logged_in_integration_disabled">未登录，禁用了集成</string>
+    <string name="service_not_logged_in">未登录，禁用了集成</string>
     <string name="endurain_logged_in_refresh_token">已登录 %1$s\n刷新令牌过期： %2$s</string>
     <string name="endurain_server_version">\n服务器版本： %1$s</string>
-    <string name="endurain_logout_failed">退出登录失败</string>
-    <string name="endurain_logged_out_successfully">成功退出登录</string>
+    <string name="service_logout_failed">退出登录失败</string>
+    <string name="service_logged_out">成功退出登录</string>
     <string name="prefs_online_fitness_trackers_title">在线健康追踪器</string>
     <string name="prefs_online_fitness_trackers_summary">配置如何访问和使用在线健康追踪器</string>
     <string name="warning_network_required_title">需要网络</string>
@@ -4581,7 +4581,7 @@
     <string name="endurain_setup_login_type_sso">SSO</string>
     <string name="endurain_setup_mfa_code">MFA 码</string>
     <string name="endurain_setup_next">下一步</string>
-    <string name="wanderer_logged_in">已登录到 %s</string>
+    <string name="service_logged_in_to">已登录到 %s</string>
     <string name="wanderer_setup_api_token_error">API 令牌应以 wanderer_key_ 开头</string>
     <string name="wanderer_setup_missing_information">请填充两个字段</string>
     <string name="pref_wanderer_status_title">Wanderer 状态</string>

@@ -4521,11 +4521,11 @@
     <string name="endurain_select_identity_provider">انتخاب ارائه‌دهنده هویت</string>
     <string name="endurain_invalid_oauth_callback">بازفراخوان OAuth نامعتبر است</string>
     <string name="endurain_oauth_completing_login">در حال تکمیل ورود…</string>
-    <string name="endurain_not_logged_in_integration_disabled">وارد نشده‌اید؛ یکپارچه‌سازی غیرفعال است</string>
+    <string name="service_not_logged_in">وارد نشده‌اید؛ یکپارچه‌سازی غیرفعال است</string>
     <string name="endurain_logged_in_refresh_token">وارد %1$s شدید\nانقضای توکن تازه‌سازی: %2$s</string>
     <string name="endurain_server_version">\nنسخه سرور: %1$s</string>
-    <string name="endurain_logout_failed">خروج از حساب ناموفق بود</string>
-    <string name="endurain_logged_out_successfully">با موفقیت از حساب خارج شدید</string>
+    <string name="service_logout_failed">خروج از حساب ناموفق بود</string>
+    <string name="service_logged_out">با موفقیت از حساب خارج شدید</string>
     <string name="prefs_online_fitness_trackers_title">ردیاب‌های آنلاین تناسب اندام</string>
     <string name="prefs_online_fitness_trackers_summary">پیکربندی نحوه دسترسی و استفاده از ردیاب‌های آنلاین تناسب اندام</string>
     <string name="warning_network_required_title">نیاز به شبکه</string>
@@ -4545,7 +4545,7 @@
     <string name="endurain_setup_login_type_sso">SSO</string>
     <string name="endurain_setup_mfa_code">کد MFA</string>
     <string name="endurain_setup_next">بعدی</string>
-    <string name="wanderer_logged_in">وارد %s شدید</string>
+    <string name="service_logged_in_to">وارد %s شدید</string>
     <string name="wanderer_setup_api_token_error">توکن API باید با wanderer_key_ شروع شود</string>
     <string name="wanderer_setup_missing_information">لطفاً هر دو فیلد را پر کنید</string>
     <string name="pref_wanderer_status_title">وضعیت Wanderer</string>

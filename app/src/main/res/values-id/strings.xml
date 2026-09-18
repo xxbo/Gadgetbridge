@@ -4581,11 +4581,11 @@
     <string name="endurain_select_identity_provider">Pilih Penyedia Identitas</string>
     <string name="endurain_invalid_oauth_callback">Callback OAuth tidak valid</string>
     <string name="endurain_oauth_completing_login">Menyelesaikan login…</string>
-    <string name="endurain_not_logged_in_integration_disabled">Belum login, integrasi dinonaktifkan</string>
+    <string name="service_not_logged_in">Belum login, integrasi dinonaktifkan</string>
     <string name="endurain_logged_in_refresh_token">Login ke %1$s\nToken refresh kedaluwarsa: %2$s</string>
     <string name="endurain_server_version">\nVersi server: %1$s</string>
-    <string name="endurain_logout_failed">Logout gagal</string>
-    <string name="endurain_logged_out_successfully">Berhasil logout</string>
+    <string name="service_logout_failed">Logout gagal</string>
+    <string name="service_logged_out">Berhasil logout</string>
     <string name="prefs_online_fitness_trackers_title">Pelacak kebugaran online</string>
     <string name="prefs_online_fitness_trackers_summary">Konfigurasikan cara menjangkau dan menggunakan pelacak kebugaran online</string>
     <string name="warning_network_required_title">Jaringan diperlukan</string>
@@ -4605,7 +4605,7 @@
     <string name="endurain_setup_login_type_sso">SSO</string>
     <string name="endurain_setup_mfa_code">Kode MFA</string>
     <string name="endurain_setup_next">Berikutnya</string>
-    <string name="wanderer_logged_in">Login ke %s</string>
+    <string name="service_logged_in_to">Login ke %s</string>
     <string name="wanderer_setup_api_token_error">Token API harus diawali dengan wanderer_key_</string>
     <string name="wanderer_setup_missing_information">Silakan isi kedua bidang</string>
     <string name="pref_wanderer_status_title">Status Wanderer</string>
