@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.externalservices.endurain
 
+import nodomain.freeyourgadget.gadgetbridge.externalservices.PkceHelper
+
 import android.app.Application
 import android.content.Context
 import androidx.core.content.edit

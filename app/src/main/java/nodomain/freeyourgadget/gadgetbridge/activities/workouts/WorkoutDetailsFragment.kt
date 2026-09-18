@@ -301,16 +301,6 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
                 true
             }
 
-            R.id.activity_action_upload_to_endurain -> {
-                uploadTo(EndurainUploadTarget)
-                true
-            }
-
-            R.id.activity_action_upload_to_wanderer -> {
-                uploadTo(WandererUploadTarget)
-                true
-            }
-
             R.id.activity_action_dev_inspect_file -> {
                 val rawDetailsPath = workout.summary.rawDetailsPath ?: return true
                 val intent = Intent(requireContext(), FitViewerActivity::class.java).apply {

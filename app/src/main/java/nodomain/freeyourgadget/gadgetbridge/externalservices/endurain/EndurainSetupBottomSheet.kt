@@ -38,6 +38,7 @@ import com.google.android.material.textfield.TextInputLayout
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.util.InternetUtils
 import nodomain.freeyourgadget.gadgetbridge.R
+import nodomain.freeyourgadget.gadgetbridge.externalservices.externalServiceLoginResultKey
 import nodomain.freeyourgadget.gadgetbridge.util.GB
 import org.slf4j.LoggerFactory
 
@@ -211,7 +212,7 @@ class EndurainSetupBottomSheet : BottomSheetDialogFragment() {
                         Toast.LENGTH_SHORT
                     ).show()
                     parentFragmentManager.setFragmentResult(
-                        "endurain_login_result",
+                        externalServiceLoginResultKey(EndurainService.id),
                         Bundle().apply { putBoolean("success", true) }
                     )
                     dismiss()
@@ -304,7 +305,7 @@ class EndurainSetupBottomSheet : BottomSheetDialogFragment() {
                         GB.toast(getString(R.string.endurain_login_successful), Toast.LENGTH_SHORT, GB.INFO)
                         // Send result to parent fragment
                         parentFragmentManager.setFragmentResult(
-                            "endurain_login_result",
+                            externalServiceLoginResultKey(EndurainService.id),
                             Bundle().apply { putBoolean("success", true) }
                         )
                         dismiss()
@@ -333,7 +334,7 @@ class EndurainSetupBottomSheet : BottomSheetDialogFragment() {
                     GB.toast(getString(R.string.endurain_mfa_verification_successful), Toast.LENGTH_SHORT, GB.INFO)
                     // Send result to parent fragment
                     parentFragmentManager.setFragmentResult(
-                        "endurain_login_result",
+                        externalServiceLoginResultKey(EndurainService.id),
                         Bundle().apply { putBoolean("success", true) }
                     )
                     dismiss()

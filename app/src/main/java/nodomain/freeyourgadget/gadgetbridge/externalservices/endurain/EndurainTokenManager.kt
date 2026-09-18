@@ -17,54 +17,27 @@
 package nodomain.freeyourgadget.gadgetbridge.externalservices.endurain
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.core.content.edit
-import androidx.security.crypto.EncryptedSharedPreferences
-import androidx.security.crypto.MasterKey
+import nodomain.freeyourgadget.gadgetbridge.externalservices.ExternalServiceTokenStore
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import java.security.GeneralSecurityException
 
-// FIXME MasterKey/EncryptedSharedPreferences is deprecated - we should move to Tink
-@Suppress("DEPRECATION")
-class EndurainTokenManager(context: Context) {
+class EndurainTokenManager(context: Context) : ExternalServiceTokenStore(context, "endurain_tokens") {
     companion object {
         private val LOG: Logger = LoggerFactory.getLogger(EndurainTokenManager::class.java)
+
+        /** Epoch seconds passed this in 2001, so anything below it is a lifetime, not a date. */
+        private const val EPOCH_THRESHOLD = 1000000000
     }
 
-    private val masterKey = MasterKey.Builder(context)
-        .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-        .build()
-
-    private val sharedPreferences = createPreferences(context)
-
-    private fun createPreferences(context: Context): SharedPreferences {
-        return try {
-            EncryptedSharedPreferences.create(
-                context,
-                "endurain_tokens",
-                masterKey,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            )
-        } catch (e: GeneralSecurityException) {
-            LOG.warn("Unable to decrypt endurain token preferences, resetting them instead\n", e)
-            context.getSharedPreferences("endurain_tokens", Context.MODE_PRIVATE)
-                .edit(commit = true) { clear() }
-            EncryptedSharedPreferences.create(
-                context,
-                "endurain_tokens",
-                masterKey,
-                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-            )
-        }
-    }
-
+    /**
+     * Stores a token pair. Endurain answers with either a lifetime in seconds or an absolute
+     * expiry, so a value too small to be an epoch timestamp is read as the former.
+     */
     fun saveTokens(accessToken: String, refreshToken: String, accessTokenExpiry: Int, refreshTokenExpiry: Int) {
-        val accessTokenExpiryTs = if (accessTokenExpiry < 1000000000) ((System.currentTimeMillis() / 1000) + accessTokenExpiry).toInt() else accessTokenExpiry
-        val refreshTokenExpiryTs = if (refreshTokenExpiry < 1000000000) ((System.currentTimeMillis() / 1000) + refreshTokenExpiry).toInt() else refreshTokenExpiry
-        sharedPreferences.edit {
+        val accessTokenExpiryTs = expiryTimestamp(accessTokenExpiry)
+        val refreshTokenExpiryTs = expiryTimestamp(refreshTokenExpiry)
+        preferences.edit {
             putString("access_token", accessToken)
                 .putString("refresh_token", refreshToken)
                 .putInt("access_token_expires_at", accessTokenExpiryTs)
@@ -72,14 +45,13 @@ class EndurainTokenManager(context: Context) {
         }
     }
 
-    fun clearTokens() {
-        sharedPreferences.edit { clear() }
-    }
+    private fun expiryTimestamp(expiry: Int): Int =
+        if (expiry < EPOCH_THRESHOLD) ((System.currentTimeMillis() / 1000) + expiry).toInt() else expiry
 
-    fun getAccessToken(): String? = sharedPreferences.getString("access_token", null)
-    fun getAccessTokenExpiresAt(): Int = sharedPreferences.getInt("access_token_expires_at", 0)
-    fun getRefreshToken(): String? = sharedPreferences.getString("refresh_token", null)
-    fun getRefreshTokenExpiresAt(): Int = sharedPreferences.getInt("refresh_token_expires_at", 0)
+    fun getAccessToken(): String? = preferences.getString("access_token", null)
+    fun getAccessTokenExpiresAt(): Int = preferences.getInt("access_token_expires_at", 0)
+    fun getRefreshToken(): String? = preferences.getString("refresh_token", null)
+    fun getRefreshTokenExpiresAt(): Int = preferences.getInt("refresh_token_expires_at", 0)
 
     fun isLoggedIn(): Boolean {
         return getRefreshToken() != null && !isRefreshTokenExpired()
