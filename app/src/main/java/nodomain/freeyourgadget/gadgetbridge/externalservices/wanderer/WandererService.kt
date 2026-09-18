@@ -19,7 +19,9 @@ package nodomain.freeyourgadget.gadgetbridge.externalservices.wanderer
 import android.content.Context
 import androidx.fragment.app.Fragment
 import nodomain.freeyourgadget.gadgetbridge.R
+import nodomain.freeyourgadget.gadgetbridge.activities.workouts.RemoteOp
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.TrackUpdateResult
+import nodomain.freeyourgadget.gadgetbridge.activities.workouts.UploadCapabilities
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.WorkoutPayloadFormat
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.WorkoutUploadStore
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.WorkoutUploadTarget
@@ -36,10 +38,17 @@ object WandererService : WorkoutUploadTarget {
 
     override val service = WorkoutUploadStore.SERVICE_WANDERER
     override val uploadMenuItemRes = R.id.activity_action_upload_to_wanderer
-    override val format = WorkoutPayloadFormat.GPX
 
-    // Wanderer stores trails, so there is nothing to upload without a track.
-    override val requiresTrack = true
+    override val capabilities = UploadCapabilities(
+        // Wanderer stores trails, so there is nothing to upload without a track.
+        formats = listOf(WorkoutPayloadFormat.GPX),
+        // trail/form/{id} writes the new track onto the existing trail, so its id and whatever the
+        // user did to it survive.
+        activity = setOf(RemoteOp.CREATE, RemoteOp.UPDATE),
+        // It infers a trail's name and type from the uploaded file.
+        metadata = emptySet(),
+        media = emptySet()
+    )
 
     override fun isLoggedIn(context: Context) = WandererTokenManager(context).isLoggedIn()
 
@@ -85,24 +94,16 @@ object WandererService : WorkoutUploadTarget {
     override fun upload(context: Context, summary: BaseActivitySummary, payload: File) =
         WorkoutUploader.uploadToWandererBlocking(context, payload)
 
-    // Wanderer infers a trail's name and type from the uploaded file.
-    override fun updateMetadata(context: Context, remoteActivityId: String, summary: BaseActivitySummary) = true
-
-    // Wanderer replaces the track on the existing trail, so the id and the user's edits survive.
     override fun updateTrack(
         context: Context,
         remoteActivityId: String,
         payload: File,
         summary: BaseActivitySummary,
         row: WorkoutUpload
-    ) = TrackUpdateResult(
-        success = WorkoutUploader.updateWandererTrackBlocking(context, remoteActivityId, payload, summary)
-    )
-
-    override fun syncPhoto(
-        context: Context,
-        remoteActivityId: String,
-        photoFile: File?,
-        previousMediaId: Int?
-    ): WorkoutUploader.PhotoSyncResult? = null
+    ): TrackUpdateResult =
+        if (WorkoutUploader.updateWandererTrackBlocking(context, remoteActivityId, payload, summary)) {
+            TrackUpdateResult.Updated
+        } else {
+            TrackUpdateResult.Failed
+        }
 }

@@ -460,12 +460,13 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
         overflowMenu2?.findItem(R.id.activity_summary_detail_action_add_photo)?.isVisible = workout.summary.headerPhoto == null
         overflowMenu2?.findItem(R.id.activity_summary_detail_action_remove_photo)?.isVisible = workout.summary.headerPhoto != null
 
-        // A service that stores tracks has nothing to take from a workout without one. The others
-        // are offered for any workout, since a FIT can be synthesized from the summary alone.
+        // A service that only stores tracks has nothing to take from a workout without one. The
+        // others are offered for any workout, since a FIT can be synthesized from the summary.
         val context = requireContext()
         viewLifecycleOwner.lifecycleScope.launch {
             val offered = withContext(Dispatchers.IO) {
-                WorkoutUploadTargets.configured(context).filter { !it.requiresTrack || hasGpx }
+                WorkoutUploadTargets.configured(context)
+                    .filter { it.capabilities.appliesTo(workout.summary) }
             }
             WorkoutUploadTargets.ALL.forEach { target ->
                 overflowMenu?.findItem(target.uploadMenuItemRes)?.isVisible = target in offered
@@ -506,7 +507,7 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
                     row?.status == WorkoutUploadStore.STATUS_SUCCESS ->
                         context.getString(R.string.workout_upload_status_pending)
 
-                    target.requiresTrack && !hasTrack ->
+                    !target.capabilities.appliesTo(summary) ->
                         context.getString(R.string.workout_upload_status_no_track)
 
                     !target.isAutoUploadEnabled(prefs) ->
@@ -734,7 +735,7 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
                 )
 
                 is WorkoutUploader.SyncOutcome.NotApplicable -> {
-                    val message = if (target.requiresTrack && !WorkoutUploader.summaryHasTrack(workout.summary)) {
+                    val message = if (!target.capabilities.appliesTo(workout.summary)) {
                         getString(R.string.no_activity_track_in_activity_toast)
                     } else {
                         getString(R.string.workout_upload_toast_no_payload, serviceName)

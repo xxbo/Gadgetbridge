@@ -22,7 +22,9 @@ import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
 import nodomain.freeyourgadget.gadgetbridge.GBApplication
 import nodomain.freeyourgadget.gadgetbridge.R
+import nodomain.freeyourgadget.gadgetbridge.activities.workouts.RemoteOp
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.TrackUpdateResult
+import nodomain.freeyourgadget.gadgetbridge.activities.workouts.UploadCapabilities
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.WorkoutPayloadFormat
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.WorkoutUploadStore
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.WorkoutUploadTarget
@@ -41,10 +43,17 @@ object EndurainService : WorkoutUploadTarget {
 
     override val service = WorkoutUploadStore.SERVICE_ENDURAIN
     override val uploadMenuItemRes = R.id.activity_action_upload_to_endurain
-    override val format = WorkoutPayloadFormat.FIT
 
-    // A FIT can be synthesized from the summary alone, so a trackless workout still uploads.
-    override val requiresTrack = false
+    override val capabilities = UploadCapabilities(
+        // A FIT can be synthesized from the summary alone, so a trackless workout still uploads.
+        formats = listOf(WorkoutPayloadFormat.FIT),
+        // No endpoint replaces an activity's track, so changing one means delete plus re-upload,
+        // which gives the activity a new id. See updateTrack.
+        activity = setOf(RemoteOp.CREATE, RemoteOp.REPLACE, RemoteOp.DELETE),
+        metadata = setOf(RemoteOp.UPDATE),
+        // Media is listed, deleted and uploaded, so a photo changes by way of a new media entry.
+        media = setOf(RemoteOp.CREATE, RemoteOp.REPLACE, RemoteOp.DELETE)
+    )
 
     /**
      * Version the server reported when it was last asked, for the settings summary. Kept here
@@ -140,7 +149,7 @@ object EndurainService : WorkoutUploadTarget {
      * Endurain can edit an activity's metadata but never its track, so the only way to push a
      * changed track is to delete the activity and upload it again under a new id.
      *
-     * That is allowed unconditionally only when it is purely additive: the activity was uploaded
+     * That is done unconditionally only when it is purely additive: the activity was uploaded
      * without a track and now has one, which is the case of a workout synced from a watch that
      * records none, with a GPX attached afterwards. Any other change re-creates an activity the
      * user may have been looking at for a while, so it needs their explicit consent.
@@ -156,28 +165,26 @@ object EndurainService : WorkoutUploadTarget {
         val allowed = trackAdded || GBApplication.getPrefs()
             .getBoolean(GBPrefs.ENDURAIN_REPLACE_ON_TRACK_CHANGE, false)
         if (!allowed) {
-            return TrackUpdateResult(success = false, unsupported = true)
+            return TrackUpdateResult.Refused(
+                context.getString(
+                    R.string.workout_upload_status_track_change_declined,
+                    context.getString(nameRes)
+                )
+            )
         }
 
         val (result, refusal) = WorkoutUploader.recreateEndurainActivityBlocking(
             context, summary, remoteActivityId, payload
         )
-        if (result != null) {
-            return TrackUpdateResult(
-                success = true,
-                newRemoteActivityId = result.remoteActivityId,
-                newPhotoMediaId = result.photoMediaId
-            )
+        if (result?.remoteActivityId != null) {
+            return TrackUpdateResult.Recreated(result.remoteActivityId, result.photoMediaId)
         }
-        return TrackUpdateResult(
-            success = false,
-            refusal = when (refusal) {
-                WorkoutUploader.RecreateRefusal.REMOTE_EDITED ->
-                    context.getString(R.string.auto_upload_endurain_remote_edited)
+        return when (refusal) {
+            WorkoutUploader.RecreateRefusal.REMOTE_EDITED ->
+                TrackUpdateResult.Refused(context.getString(R.string.auto_upload_endurain_remote_edited))
 
-                else -> null
-            }
-        )
+            else -> TrackUpdateResult.Failed
+        }
     }
 
     override fun syncPhoto(

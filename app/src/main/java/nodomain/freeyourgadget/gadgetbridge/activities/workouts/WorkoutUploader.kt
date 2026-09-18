@@ -201,9 +201,12 @@ object WorkoutUploader {
             WorkoutUploadStore.recordFailure(id, target.service, result.reason)
             return SyncOutcome.Failed(result.reason)
         }
-        // A photo the service did not take leaves both fingerprints unset, so the next run comes
-        // back for it rather than treating the workout as fully in step.
-        val photoLanded = summary.headerPhoto == null || result.photoMediaId != null
+        // A photo the service could have taken and did not leaves both fingerprints unset, so the
+        // next run comes back for it rather than treating the workout as fully in step. A service
+        // that holds no media has nothing to come back for.
+        val photoLanded = summary.headerPhoto == null ||
+                RemoteOp.CREATE !in target.capabilities.media ||
+                result.photoMediaId != null
         WorkoutUploadStore.recordSuccess(
             id, target.service, result.remoteActivityId,
             if (photoLanded) WorkoutUploadStore.photoHashOf(summary.headerPhoto) else null,
@@ -247,65 +250,72 @@ object WorkoutUploader {
         // The track goes first: a service that can only update one by re-creating the activity
         // gives back a new activity id, and the photo and metadata belong on the replacement.
         var recreated = false
-        val payload = buildPayload(context, gbDevice, provider, target, summary, summaryData)
+        // A service with no way to change a track is not asked to build a payload it cannot use.
+        val payload = if (target.capabilities.activity.canChange()) {
+            buildPayload(context, gbDevice, provider, target, summary, summaryData)
+        } else {
+            null
+        }
         val newPayloadHash = payload?.let { WorkoutUploadStore.fileHashOf(it) }
         if (payload != null && newPayloadHash != row.payloadHash) {
-            val update = target.updateTrack(context, remoteId, payload, summary, row)
-            when {
-                update.success -> {
+            when (val update = target.updateTrack(context, remoteId, payload, summary, row)) {
+                is TrackUpdateResult.Updated -> {
                     payloadHash = newPayloadHash
                     hadTrack = summaryHasTrack(summary)
-                    update.newRemoteActivityId?.let {
-                        remoteId = it
-                        recreated = true
-                        photoMediaId = update.newPhotoMediaId
-                        // The replacement is uploaded from the current workout, so it carries the
-                        // current photo, but only once the media id comes back.
-                        if (summary.headerPhoto == null || update.newPhotoMediaId != null) {
-                            photoHash = WorkoutUploadStore.photoHashOf(summary.headerPhoto)
-                        } else {
-                            pending = true
-                        }
+                }
+
+                is TrackUpdateResult.Recreated -> {
+                    payloadHash = newPayloadHash
+                    hadTrack = summaryHasTrack(summary)
+                    remoteId = update.remoteActivityId
+                    recreated = true
+                    photoMediaId = update.photoMediaId
+                    // The replacement is uploaded from the current workout, so it carries the
+                    // current photo, but only once the media id comes back.
+                    if (summary.headerPhoto == null || update.photoMediaId != null) {
+                        photoHash = WorkoutUploadStore.photoHashOf(summary.headerPhoto)
+                    } else {
+                        pending = true
                     }
                 }
 
-                // Nothing this service can do about a changed track. Only the metadata and the
-                // photo can move, so the recorded payload stays what was uploaded.
-                update.unsupported -> Unit
+                // A deliberate refusal will not resolve itself, so the fingerprints advance and
+                // the user is told once rather than on every sync.
+                is TrackUpdateResult.Refused -> refusal = update.message
 
-                else -> {
+                is TrackUpdateResult.Failed -> {
+                    // A transient failure: keep the old fingerprints so the next run retries.
                     LOG.warn("Track update to service {} failed for summary {}", target.service, id)
-                    refusal = update.refusal
-                    if (refusal == null) {
-                        // A transient failure: keep the old fingerprints so the next run retries.
-                        return SyncOutcome.Failed(null)
-                    }
-                    // A deliberate refusal will not resolve itself, so the fingerprints advance
-                    // and the user is told once rather than on every sync.
+                    return SyncOutcome.Failed(null)
                 }
             }
         }
 
         val newPhotoHash = WorkoutUploadStore.photoHashOf(summary.headerPhoto)
         if (!recreated && newPhotoHash != row.photoHash) {
-            val sync = target.syncPhoto(
-                context, remoteId, summary.headerPhoto?.let { File(it) }, row.photoMediaId
+            val canSync = target.capabilities.canSyncMedia(
+                hadPhoto = row.photoHash != null,
+                hasPhoto = summary.headerPhoto != null
             )
-            when {
-                sync == null -> photoHash = newPhotoHash  // service has no media API
-                sync.success -> {
+            if (!canSync) {
+                // Nothing this service can do about the photo, so the fingerprint advances rather
+                // than bringing every later sync back to a step that cannot go through.
+                photoHash = newPhotoHash
+            } else {
+                val sync = target.syncPhoto(
+                    context, remoteId, summary.headerPhoto?.let { File(it) }, row.photoMediaId
+                )
+                if (sync.success) {
                     photoHash = newPhotoHash
                     photoMediaId = sync.mediaId
-                }
-
-                else -> {
+                } else {
                     LOG.warn("Photo sync to service {} failed for summary {}", target.service, id)
                     pending = true
                 }
             }
         }
 
-        if (!recreated) {
+        if (!recreated && target.capabilities.editableMetadata) {
             // A replacement activity is created with the right name and type already.
             target.updateMetadata(context, remoteId, summary)
         }
@@ -332,10 +342,7 @@ object WorkoutUploader {
         summary: BaseActivitySummary,
         summaryData: ActivitySummaryData?
     ): File? {
-        if (target.requiresTrack && !summaryHasTrack(summary)) {
-            return null
-        }
-        return when (target.format) {
+        return when (target.capabilities.formatFor(summary)) {
             WorkoutPayloadFormat.FIT -> try {
                 buildFitFile(context, gbDevice, summary, summaryData)
             } catch (e: Exception) {
@@ -346,6 +353,8 @@ object WorkoutUploader {
             WorkoutPayloadFormat.GPX -> provider?.let {
                 ActivitySummaryUtils.getShareableGpxFile(it, summary)
             }
+
+            null -> null
         }
     }
 
