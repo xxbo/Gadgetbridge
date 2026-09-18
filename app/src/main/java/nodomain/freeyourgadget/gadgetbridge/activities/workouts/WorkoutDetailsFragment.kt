@@ -475,9 +475,7 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
         val context = requireContext()
         viewLifecycleOwner.lifecycleScope.launch {
             val offered = withContext(Dispatchers.IO) {
-                WorkoutUploadTargets.ALL.filter {
-                    (!it.requiresTrack || hasGpx) && it.isConfigured(context)
-                }
+                WorkoutUploadTargets.configured(context).filter { !it.requiresTrack || hasGpx }
             }
             WorkoutUploadTargets.ALL.forEach { target ->
                 overflowMenu?.findItem(target.uploadMenuItemRes)?.isVisible = target in offered
@@ -504,8 +502,7 @@ class WorkoutDetailsFragment : Fragment(), MenuProvider {
         val view = layoutInflater.inflate(R.layout.dialog_workout_upload_status, null)
         val container = view.findViewById<LinearLayout>(R.id.upload_status_container)
 
-        WorkoutUploadTargets.ALL
-            .filter { it.isConfigured(context) }
+        WorkoutUploadTargets.configured(context)
             .forEach { target ->
                 val row = rows[target.service]
                 val state = when {

@@ -150,9 +150,22 @@ interface WorkoutUploadTarget {
 object WorkoutUploadTargets {
     val ALL: List<WorkoutUploadTarget> = listOf(EndurainUploadTarget, WandererUploadTarget)
 
-    /** Targets the user has both enabled and finished setting up. */
-    fun active(context: Context, prefs: GBPrefs): List<WorkoutUploadTarget> =
-        ALL.filter { it.isAutoUploadEnabled(prefs) && it.isConfigured(context) }
+    /**
+     * Targets the user has finished setting up, whether or not they take workouts on their own.
+     * This is the set a workout can be sent to at all, so it is what the screens showing upload
+     * state answer against.
+     */
+    @JvmStatic
+    fun configured(context: Context): List<WorkoutUploadTarget> =
+        ALL.filter { it.isConfigured(context) }
+
+    /**
+     * Targets set up and asked to take every synced workout without being told to, which is the
+     * set the background worker drives.
+     */
+    @JvmStatic
+    fun autoUploadEnabled(context: Context, prefs: GBPrefs): List<WorkoutUploadTarget> =
+        configured(context).filter { it.isAutoUploadEnabled(prefs) }
 }
 
 object EndurainUploadTarget : WorkoutUploadTarget {
