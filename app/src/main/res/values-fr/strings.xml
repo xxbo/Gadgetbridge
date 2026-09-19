@@ -4367,7 +4367,7 @@
     <string name="endurain_no_sso_providers_available">Aucun fournisseur SSO n\'a été trouvé</string>
     <string name="endurain_login_successful">Connexion réussie</string>
     <string name="endurain_login_failed">Échec de connexion</string>
-    <string name="endurain_oauth_completing_login">Connexion en cours…</string>
+    <string name="service_oauth_completing_login">Connexion en cours…</string>
     <string name="service_not_logged_in">Non connecté, intégration désactivée</string>
     <string name="service_logged_out">Déconnexion réussie</string>
     <string name="warning_network_required_title">Un réseau est nécessaire</string>

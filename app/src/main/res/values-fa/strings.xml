@@ -4520,7 +4520,7 @@
     <string name="endurain_mfa_verification_failed">تأیید MFA ناموفق بود</string>
     <string name="endurain_select_identity_provider">انتخاب ارائه‌دهنده هویت</string>
     <string name="endurain_invalid_oauth_callback">بازفراخوان OAuth نامعتبر است</string>
-    <string name="endurain_oauth_completing_login">در حال تکمیل ورود…</string>
+    <string name="service_oauth_completing_login">در حال تکمیل ورود…</string>
     <string name="service_not_logged_in">وارد نشده‌اید؛ یکپارچه‌سازی غیرفعال است</string>
     <string name="endurain_logged_in_refresh_token">وارد %1$s شدید\nانقضای توکن تازه‌سازی: %2$s</string>
     <string name="endurain_server_version">\nنسخه سرور: %1$s</string>

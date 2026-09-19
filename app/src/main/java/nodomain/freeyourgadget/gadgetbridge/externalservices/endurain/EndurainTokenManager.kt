@@ -1,4 +1,4 @@
-/*  Copyright (C) 2026 Arjan Schrijver
+/*  Copyright (C) 2026 Arjan Schrijver, José Rebelo, Dany Mestas
 
     This file is part of Gadgetbridge.
 
@@ -17,52 +17,19 @@
 package nodomain.freeyourgadget.gadgetbridge.externalservices.endurain
 
 import android.content.Context
-import androidx.core.content.edit
-import nodomain.freeyourgadget.gadgetbridge.externalservices.ExternalServiceTokenStore
+import nodomain.freeyourgadget.gadgetbridge.externalservices.OAuthTokenStore
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 
-class EndurainTokenManager(context: Context) : ExternalServiceTokenStore(context, "endurain_tokens") {
+class EndurainTokenManager(context: Context) : OAuthTokenStore(context, "endurain_tokens") {
     companion object {
         private val LOG: Logger = LoggerFactory.getLogger(EndurainTokenManager::class.java)
-
-        /** Epoch seconds passed this in 2001, so anything below it is a lifetime, not a date. */
-        private const val EPOCH_THRESHOLD = 1000000000
     }
 
     /**
-     * Stores a token pair. Endurain answers with either a lifetime in seconds or an absolute
-     * expiry, so a value too small to be an epoch timestamp is read as the former.
+     * Renews the token pair against [serverUrl], answering through [callback] whether it worked.
+     * Runs on a thread of its own.
      */
-    fun saveTokens(accessToken: String, refreshToken: String, accessTokenExpiry: Int, refreshTokenExpiry: Int) {
-        val accessTokenExpiryTs = expiryTimestamp(accessTokenExpiry)
-        val refreshTokenExpiryTs = expiryTimestamp(refreshTokenExpiry)
-        preferences.edit {
-            putString("access_token", accessToken)
-                .putString("refresh_token", refreshToken)
-                .putInt("access_token_expires_at", accessTokenExpiryTs)
-                .putInt("refresh_token_expires_at", refreshTokenExpiryTs)
-        }
-    }
-
-    private fun expiryTimestamp(expiry: Int): Int =
-        if (expiry < EPOCH_THRESHOLD) ((System.currentTimeMillis() / 1000) + expiry).toInt() else expiry
-
-    fun getAccessToken(): String? = preferences.getString("access_token", null)
-    fun getAccessTokenExpiresAt(): Int = preferences.getInt("access_token_expires_at", 0)
-    fun getRefreshToken(): String? = preferences.getString("refresh_token", null)
-    fun getRefreshTokenExpiresAt(): Int = preferences.getInt("refresh_token_expires_at", 0)
-
-    fun isLoggedIn(): Boolean {
-        return getRefreshToken() != null && !isRefreshTokenExpired()
-    }
-    fun isAccessTokenExpired(): Boolean {
-        return (System.currentTimeMillis() / 1000) >= getAccessTokenExpiresAt()
-    }
-    fun isRefreshTokenExpired(): Boolean {
-        return (System.currentTimeMillis() / 1000) >= getRefreshTokenExpiresAt()
-    }
-
     fun performTokenRefresh(
         serverUrl: String,
         callback: (Boolean) -> Unit
@@ -77,6 +44,7 @@ class EndurainTokenManager(context: Context) : ExternalServiceTokenStore(context
                         LOG.error("Token refresh failed: null response")
                         callback(false)
                     }
+
                     response.access_token != null -> {
                         LOG.info("Token refresh successful")
                         saveTokens(
@@ -87,8 +55,9 @@ class EndurainTokenManager(context: Context) : ExternalServiceTokenStore(context
                         )
                         callback(true)
                     }
+
                     else -> {
-                        LOG.error("Token refresh failed: ${response.detail}")
+                        LOG.error("Token refresh failed: {}", response.detail)
                         callback(false)
                     }
                 }

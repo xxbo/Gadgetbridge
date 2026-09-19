@@ -17,6 +17,7 @@
 package nodomain.freeyourgadget.gadgetbridge.externalservices
 
 import android.content.Context
+import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceFragmentCompat
@@ -120,6 +121,19 @@ interface ExternalService {
      * set up by scheduling nothing.
      */
     fun scheduleBackgroundWork(context: Context) {}
+
+    /**
+     * Renews the stored credentials, for a service whose login expires. Answers whether it worked;
+     * a service whose credentials do not expire has nothing to do and says so. Blocking: called
+     * from a worker.
+     */
+    fun refreshCredentials(context: Context): Boolean = true
+
+    /**
+     * Handles the link the browser comes back on after a login, whose host is this service's [id].
+     * What the rest of it carries is the service's own business.
+     */
+    fun onLoginCallback(context: Context, uri: Uri) {}
 }
 
 /**

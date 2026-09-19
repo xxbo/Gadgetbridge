@@ -4619,7 +4619,7 @@
     <string name="endurain_mfa_verification_failed">Не удалось выполнить проверку MFA</string>
     <string name="endurain_select_identity_provider">Выберите поставщика удостоверений</string>
     <string name="endurain_invalid_oauth_callback">Недопустимый обратный вызов OAuth</string>
-    <string name="endurain_oauth_completing_login">Завершение входа…</string>
+    <string name="service_oauth_completing_login">Завершение входа…</string>
     <string name="service_not_logged_in">Вход не выполнен, интеграция отключена</string>
     <string name="endurain_logged_in_refresh_token">Выполнен вход в %1$s\nСрок действия токена обновления истекает: %2$s</string>
     <string name="endurain_server_version">\nВерсия сервера: %1$s</string>

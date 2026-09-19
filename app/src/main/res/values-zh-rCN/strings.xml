@@ -4556,7 +4556,7 @@
     <string name="endurain_mfa_verification_failed">MFA 验证失败</string>
     <string name="endurain_select_identity_provider">选择身份提供方</string>
     <string name="endurain_invalid_oauth_callback">无效的 OAuth 调用</string>
-    <string name="endurain_oauth_completing_login">正在完成登录…</string>
+    <string name="service_oauth_completing_login">正在完成登录…</string>
     <string name="service_not_logged_in">未登录，禁用了集成</string>
     <string name="endurain_logged_in_refresh_token">已登录 %1$s\n刷新令牌过期： %2$s</string>
     <string name="endurain_server_version">\n服务器版本： %1$s</string>

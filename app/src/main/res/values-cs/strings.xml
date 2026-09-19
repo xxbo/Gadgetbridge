@@ -4562,7 +4562,7 @@
     <string name="endurain_mfa_verification_failed">Ověření MFA selhalo</string>
     <string name="endurain_select_identity_provider">Vyberte poskytovatele identity</string>
     <string name="endurain_invalid_oauth_callback">Neplatné volání OAuth</string>
-    <string name="endurain_oauth_completing_login">Dokončování přihlášení…</string>
+    <string name="service_oauth_completing_login">Dokončování přihlášení…</string>
     <string name="service_not_logged_in">Nejste přihlášeni, integrace je zakázána</string>
     <string name="endurain_logged_in_refresh_token">Přihlášeni k %1$s\nObnovovací token vyprší: %2$s</string>
     <string name="endurain_server_version">\nVerze serveru: %1$s</string>

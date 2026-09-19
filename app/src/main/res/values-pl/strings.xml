@@ -4497,7 +4497,7 @@
     <string name="soundbrenner_pref_subdivision_title">Podział</string>
     <string name="endurain_select_identity_provider">Wybierz dostawcę tożsamości</string>
     <string name="endurain_invalid_oauth_callback">Nieprawidłowe wywołanie zwrotne OAuth</string>
-    <string name="endurain_oauth_completing_login">Trwa logowanie…</string>
+    <string name="service_oauth_completing_login">Trwa logowanie…</string>
     <string name="service_not_logged_in">Nie zalogowano, integracja jest wyłączona</string>
     <string name="endurain_logged_in_refresh_token">Zalogowano do %1$s\nWażność tokena odświeżania wygasa: %2$s</string>
     <string name="endurain_server_version">\nWersja serwera: %1$s</string>

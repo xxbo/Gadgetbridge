@@ -111,7 +111,7 @@ class EndurainSetupBottomSheet : BottomSheetDialogFragment() {
         // Register broadcast receiver for SSO callbacks
         LocalBroadcastManager.getInstance(requireContext()).registerReceiver(
             ssoCallbackReceiver,
-            IntentFilter("nodomain.freeyourgadget.gadgetbridge.ENDURAIN_SSO_CALLBACK")
+            IntentFilter(EndurainService.SSO_CALLBACK_ACTION)
         )
 
         next.setOnClickListener {

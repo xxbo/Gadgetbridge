@@ -5603,7 +5603,7 @@
     <string name="endurain_mfa_verification_failed">MFA verification failed</string>
     <string name="endurain_select_identity_provider">Select Identity Provider</string>
     <string name="endurain_invalid_oauth_callback">Invalid OAuth callback</string>
-    <string name="endurain_oauth_completing_login">Completing login…</string>
+    <string name="service_oauth_completing_login">Completing login…</string>
     <string name="service_not_logged_in">Not logged in, integration is disabled</string>
     <string name="endurain_logged_in_refresh_token">Logged in to %1$s\nRefresh token expires: %2$s</string>
     <string name="endurain_server_version">\nServer version: %1$s</string>

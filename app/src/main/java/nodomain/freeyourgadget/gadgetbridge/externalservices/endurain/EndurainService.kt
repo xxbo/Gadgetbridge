@@ -17,6 +17,9 @@
 package nodomain.freeyourgadget.gadgetbridge.externalservices.endurain
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import androidx.fragment.app.Fragment
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.SwitchPreferenceCompat
@@ -33,6 +36,7 @@ import nodomain.freeyourgadget.gadgetbridge.entities.BaseActivitySummary
 import nodomain.freeyourgadget.gadgetbridge.entities.WorkoutUpload
 import nodomain.freeyourgadget.gadgetbridge.externalservices.AuthStyle
 import nodomain.freeyourgadget.gadgetbridge.externalservices.ExternalServiceCalls
+import nodomain.freeyourgadget.gadgetbridge.externalservices.ExternalServiceTokenRefreshWorker
 import nodomain.freeyourgadget.gadgetbridge.model.ActivityKind
 import nodomain.freeyourgadget.gadgetbridge.util.DateTimeUtils
 import nodomain.freeyourgadget.gadgetbridge.util.GBPrefs
@@ -125,9 +129,31 @@ object EndurainService : WorkoutUploadTarget {
 
     /** The refresh token expires, so it is renewed on a schedule rather than at the next upload. */
     override fun scheduleBackgroundWork(context: Context) {
-        EndurainPeriodicTokenRefresher.scheduleNextExecution(context)
+        ExternalServiceTokenRefreshWorker.schedule(context, this)
     }
 
+    override fun refreshCredentials(context: Context): Boolean {
+        val server = serverUrl() ?: return false
+        return ExternalServiceCalls.await<Boolean>(WorkoutUploader.DEFAULT_UPLOAD_TIMEOUT_SECONDS) { done ->
+            EndurainTokenManager(context).performTokenRefresh(server) { done(it) }
+        } == true
+    }
+
+    /**
+     * Endurain brokers the identity provider itself, so the link comes back naming a session on
+     * the server rather than an authorization code, and the setup wizard collects the tokens.
+     */
+    override fun onLoginCallback(context: Context, uri: Uri) {
+        val sessionId = uri.getQueryParameter("session_id")
+        val result = Intent(SSO_CALLBACK_ACTION).apply {
+            putExtra("session_id", sessionId)
+            putExtra("success", sessionId != null)
+        }
+        if (sessionId == null) {
+            LOG.error("SSO callback carried no session id")
+        }
+        LocalBroadcastManager.getInstance(context).sendBroadcast(result)
+    }
 
     override fun activityUrl(context: Context, remoteActivityId: String): String? {
         val server = serverUrl() ?: return null
@@ -383,4 +409,7 @@ object EndurainService : WorkoutUploadTarget {
     }
 
     private val LOG = LoggerFactory.getLogger(EndurainService::class.java)
+
+    /** Where the setup wizard listens for the outcome of a browser login. */
+    const val SSO_CALLBACK_ACTION = "nodomain.freeyourgadget.gadgetbridge.ENDURAIN_SSO_CALLBACK"
 }

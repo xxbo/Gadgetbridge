@@ -4403,7 +4403,7 @@
     <string name="endurain_mfa_verification_failed">Nem sikerült az MFA-ellenőrzés</string>
     <string name="endurain_select_identity_provider">Személyazonosság-szolgáltató kiválasztása</string>
     <string name="endurain_invalid_oauth_callback">Érvénytelen OAuth-visszahívás</string>
-    <string name="endurain_oauth_completing_login">Bejelentkezés befejezése…</string>
+    <string name="service_oauth_completing_login">Bejelentkezés befejezése…</string>
     <string name="service_not_logged_in">Nincs bejelentkezve, az integráció le van tiltva</string>
     <string name="endurain_logged_in_refresh_token">Bejelentkezve ide: %1$s\nA frissítési token lejár: %2$s</string>
     <string name="endurain_server_version">\nKiszolgáló verziója: %1$s</string>
