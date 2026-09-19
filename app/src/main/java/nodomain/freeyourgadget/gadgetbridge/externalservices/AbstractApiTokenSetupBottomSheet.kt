@@ -22,6 +22,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
+import android.widget.TextView
 import android.widget.Toast
 import androidx.annotation.IdRes
 import androidx.annotation.LayoutRes
@@ -84,6 +85,8 @@ abstract class AbstractApiTokenSetupBottomSheet(
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        view.findViewById<TextView>(R.id.title)?.text =
+            getString(R.string.service_setup_title, getString(service.nameRes))
         serverViewId?.let { id ->
             serverInput = view.findViewById<EditText>(id).apply {
                 setText(service.serverUrl().orEmpty())

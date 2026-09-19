@@ -37,7 +37,7 @@ import java.io.File
 
 object WandererService : WorkoutUploadTarget {
     override val id = "wanderer"
-    override val nameRes = R.string.pref_category_wanderer
+    override val nameRes = R.string.service_name_wanderer
     override val authStyle = AuthStyle.API_TOKEN
 
     override val service = WorkoutUploadStore.SERVICE_WANDERER

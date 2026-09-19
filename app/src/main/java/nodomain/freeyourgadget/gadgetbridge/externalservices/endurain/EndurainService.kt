@@ -45,7 +45,7 @@ import java.io.File
 
 object EndurainService : WorkoutUploadTarget {
     override val id = "endurain"
-    override val nameRes = R.string.pref_category_endurain
+    override val nameRes = R.string.service_name_endurain
     override val authStyle = AuthStyle.LOGIN
 
     override val service = WorkoutUploadStore.SERVICE_ENDURAIN
@@ -75,14 +75,14 @@ object EndurainService : WorkoutUploadTarget {
         val tokenManager = EndurainTokenManager(context)
         var summary = if (tokenManager.isLoggedIn() && server != null) {
             context.getString(
-                R.string.endurain_logged_in_refresh_token,
+                R.string.service_logged_in_refresh_token,
                 server,
                 DateTimeUtils.parseTimeStamp(tokenManager.getRefreshTokenExpiresAt())
             )
         } else {
             context.getString(R.string.service_not_logged_in)
         }
-        serverVersion?.let { summary += context.getString(R.string.endurain_server_version, it) }
+        serverVersion?.let { summary += context.getString(R.string.service_server_version, it) }
         return summary
     }
 

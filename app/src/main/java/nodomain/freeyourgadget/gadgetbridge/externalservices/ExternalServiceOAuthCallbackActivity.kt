@@ -46,12 +46,12 @@ class ExternalServiceOAuthCallbackActivity : AbstractGBActivity() {
         when {
             uri == null -> {
                 LOG.error("No URI in the login callback")
-                Toast.makeText(this, R.string.endurain_invalid_oauth_callback, Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.service_invalid_oauth_callback, Toast.LENGTH_SHORT).show()
             }
 
             service == null -> {
                 LOG.error("Login callback for unknown service '{}'", uri.host)
-                Toast.makeText(this, R.string.endurain_invalid_oauth_callback, Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, R.string.service_invalid_oauth_callback, Toast.LENGTH_SHORT).show()
             }
 
             else -> {
