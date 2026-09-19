@@ -113,6 +113,9 @@ object EndurainService : WorkoutUploadTarget {
     // it no longer matches.
     override val keepsRemoteEdits = true
 
+    override fun credentialsExpired(context: Context): Boolean =
+        EndurainTokenManager(context).isAccessTokenExpired()
+
     override fun refreshCredentials(context: Context): Boolean {
         val server = serverUrl() ?: return false
         return ExternalServiceCalls.await<Boolean>(WorkoutUploader.DEFAULT_UPLOAD_TIMEOUT_SECONDS) { done ->
