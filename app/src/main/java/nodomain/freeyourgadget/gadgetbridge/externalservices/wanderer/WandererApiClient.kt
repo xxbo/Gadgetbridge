@@ -173,6 +173,44 @@ class WandererApiClient(
     }
 
     /**
+     * Writes [fields] onto the trail without sending a track. The same form endpoint takes the
+     * fields on their own, and leaves everything it is not given alone.
+     *
+     * [callback] fires with (success, reason); reason is null on success.
+     */
+    fun updateTrailFields(
+        trailId: String,
+        fields: Map<String, String>,
+        callback: (Boolean, String?) -> Unit
+    ) {
+        Thread {
+            try {
+                InternetUtils.sendMultipartForm(
+                    uri = "$baseUrl/api/v1/trail/form/$trailId".toUri(),
+                    formFields = mapOf("id" to trailId) + fields,
+                    requestHeaders = buildHeaders()
+                ) { success, statusCode, responseText, reason ->
+                    if (success && statusCode != null && statusCode in 200..299) {
+                        LOG.info("Updated Wanderer trail {}", trailId)
+                        callback(true, null)
+                    } else {
+                        val message = try {
+                            if (responseText != null) JSONObject(responseText).getString("message") else null
+                        } catch (e: Exception) {
+                            null
+                        } ?: reason ?: statusCode?.let { "HTTP $it" }
+                        LOG.error("Updating trail {} failed: {}", trailId, message)
+                        callback(false, message)
+                    }
+                }
+            } catch (e: Exception) {
+                LOG.error("Trail update error", e)
+                callback(false, e.localizedMessage)
+            }
+        }.start()
+    }
+
+    /**
      * Upload activity file (GPX)
      */
     fun uploadActivity(file: File, callback: (String?, String?) -> Unit) {
