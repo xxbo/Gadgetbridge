@@ -57,6 +57,7 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.annotation.VisibleForTesting;
 import androidx.core.app.ServiceCompat;
 import androidx.core.content.ContextCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
@@ -139,6 +140,11 @@ public class DeviceCommunicationService extends Service implements SharedPrefere
 
     private DeviceSupportFactory mFactory;
     private final ArrayList<DeviceStruct> deviceStructs = new ArrayList<>(1);
+
+    @VisibleForTesting
+    void setDeviceSupportFactory(final DeviceSupportFactory factory) {
+        mFactory = factory;
+    }
     private final HashMap<String, ArrayList<Intent>> cachedNotifications = new HashMap<>();
     private DeviceReceiversManager deviceReceiversManager;
 
@@ -496,7 +502,8 @@ public class DeviceCommunicationService extends Service implements SharedPrefere
      * {@link GBDevice.State#WAITING_FOR_SCAN} (or connected) through the usual paths, and an
      * advertisement from a device that is not waiting for scan is dropped.
      */
-    private void handleScanResult(final GBDevice device, final ScanResult scanResult) {
+    @VisibleForTesting
+    void handleScanResult(final GBDevice device, final ScanResult scanResult) {
         final DeviceStruct struct = getDeviceStructOrNull(device);
         if (struct == null) {
             LOG.debug("handleScanResult - ignoring advertisement from {}, not waiting for scan", device.getAddress());
@@ -556,7 +563,8 @@ public class DeviceCommunicationService extends Service implements SharedPrefere
         stopService(scanServiceIntent);
     }
 
-    private DeviceStruct createDeviceStruct(GBDevice target) {
+    @VisibleForTesting
+    DeviceStruct createDeviceStruct(GBDevice target) {
         DeviceStruct registeredStruct = new DeviceStruct();
         registeredStruct.setDevice(target);
         registeredStruct.setCoordinator(target.getDeviceCoordinator());
