@@ -65,6 +65,21 @@ class WorkoutListActivity : AbstractListActivity<BaseActivitySummary>() {
     private var summariesAdapter: WorkoutSummariesAdapter? = null
     private var actionMode: ActionMode? = null
 
+    /** Services set up to take workouts, read when the selection mode starts. */
+    private var configuredServices: List<WorkoutUploadTarget> = emptyList()
+    private var offeredServices: List<WorkoutUploadTarget> = emptyList()
+    private var uploadMenuItems: Map<Int, WorkoutUploadTarget> = emptyMap()
+
+    private val batchUploadListener: (WorkoutBatchTally) -> Unit = { tally ->
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.workout_upload_batch_title)
+            .setMessage(tally.describe(this))
+            .setIcon(R.drawable.ic_file_upload)
+            .setPositiveButton(R.string.ok, null)
+            .show()
+        refresh()
+    }
+
     private val activityDetailLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == WorkoutDetailsActivity.RESULT_WORKOUT_CHANGED) {
             // FIXME we could try to only update the workouts that changed
@@ -251,7 +266,12 @@ class WorkoutListActivity : AbstractListActivity<BaseActivitySummary>() {
         }
 
         viewModel.isLoading.observe(this) { isLoading ->
-            swipeLayout.isRefreshing = isLoading
+            swipeLayout.isRefreshing = isLoading || WorkoutBatchUploader.running.value == true
+        }
+
+        WorkoutBatchUploader.running.observe(this) { running ->
+            swipeLayout.isRefreshing = running || viewModel.isLoading.value == true
+            actionMode?.invalidate()
         }
 
         viewModel.error.observe(this) { error ->
@@ -273,6 +293,50 @@ class WorkoutListActivity : AbstractListActivity<BaseActivitySummary>() {
         refresh()
     }
 
+    override fun onStart() {
+        super.onStart()
+        WorkoutBatchUploader.listener = batchUploadListener
+    }
+
+    override fun onStop() {
+        if (WorkoutBatchUploader.listener === batchUploadListener) {
+            WorkoutBatchUploader.listener = null
+        }
+        super.onStop()
+    }
+
+    private fun selectedSummaries(): List<BaseActivitySummary> {
+        val selected = selectedItems ?: return emptyList()
+        return (0 until selected.length())
+            .filter { selected.get(it) }
+            .mapNotNull { itemAdapter?.getItem(it) }
+            .filter { it.id != null && it.id != Long.MIN_VALUE && it.id != Long.MAX_VALUE }
+    }
+
+    /**
+     * Hands [summaries] to [WorkoutBatchUploader], after warning once that it takes a while. The
+     * outcome comes back as a single summary rather than a message per workout and service.
+     */
+    private fun startBatchUpload(
+        summaries: List<BaseActivitySummary>,
+        targets: List<WorkoutUploadTarget>
+    ) {
+        if (summaries.isEmpty() || targets.isEmpty()) {
+            return
+        }
+        if (!WorkoutBatchUploader.start(this, summaries, targets)) {
+            GB.toast(getString(R.string.workout_upload_batch_busy), Toast.LENGTH_SHORT, GB.INFO)
+            return
+        }
+        GB.toast(
+            resources.getQuantityString(
+                R.plurals.workout_upload_batch_started, summaries.size, summaries.size
+            ),
+            Toast.LENGTH_LONG,
+            GB.INFO
+        )
+    }
+
     private fun stopActionMode() {
         actionMode?.finish()
         actionMode = null
@@ -284,6 +348,7 @@ class WorkoutListActivity : AbstractListActivity<BaseActivitySummary>() {
         if (actionMode != null) {
             // already in action mode
             actionMode?.title = getString(R.string.number_selected_items, numSelected)
+            actionMode?.invalidate()
             return
         }
 
@@ -302,12 +367,58 @@ class WorkoutListActivity : AbstractListActivity<BaseActivitySummary>() {
                 }
 
                 findViewById<View>(R.id.fab).visibility = View.INVISIBLE
+
+                // Reading the services touches encrypted preferences, so the upload entries are
+                // added once it is done.
+                lifecycleScope.launch {
+                    configuredServices = withContext(Dispatchers.IO) {
+                        WorkoutUploadTargets.configured(this@WorkoutListActivity)
+                    }
+                    if (actionMode === mode) {
+                        mode.invalidate()
+                    }
+                }
                 return true
             }
 
-            override fun onPrepareActionMode(mode: ActionMode, menu: Menu) = false
+            override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+                menu.removeGroup(WorkoutUploadMenu.UPLOAD_GROUP_ID)
+                val selected = selectedSummaries()
+                offeredServices = if (WorkoutBatchUploader.running.value == true) {
+                    emptyList()
+                } else {
+                    configuredServices.filter { target ->
+                        selected.any { target.capabilities.appliesTo(it) }
+                    }
+                }
+                uploadMenuItems = WorkoutUploadMenu.build(
+                    menu, this@WorkoutListActivity, offeredServices, UPLOAD_MENU_ORDER
+                )
+                val typedValue = android.util.TypedValue()
+                theme.resolveAttribute(R.attr.actionmenu_icon_color, typedValue, true)
+                for (i in 0 until menu.size) {
+                    if (menu[i].groupId == WorkoutUploadMenu.UPLOAD_GROUP_ID) {
+                        menu[i].icon?.setTint(typedValue.data)
+                    }
+                }
+                return true
+            }
 
             override fun onActionItemClicked(mode: ActionMode, menuItem: MenuItem): Boolean {
+                val uploadTargets = when (menuItem.itemId) {
+                    WorkoutUploadMenu.UPLOAD_ALL_ITEM_ID -> offeredServices
+                    else -> uploadMenuItems[menuItem.itemId]?.let { listOf(it) }
+                }
+                if (uploadTargets != null) {
+                    startBatchUpload(selectedSummaries(), uploadTargets)
+                    mode.finish()
+                    actionMode = null
+                    return true
+                }
+                // The submenu holding the upload entries opens on its own.
+                if (menuItem.groupId == WorkoutUploadMenu.UPLOAD_GROUP_ID) {
+                    return false
+                }
                 when (menuItem.itemId) {
                     R.id.activity_action_delete -> {
                         val toDelete = ArrayList<BaseActivitySummary>()
@@ -600,5 +711,8 @@ class WorkoutListActivity : AbstractListActivity<BaseActivitySummary>() {
     companion object {
         private val LOG = LoggerFactory.getLogger(WorkoutListActivity::class.java)
         private const val PREF_EXPORT_AS_ZIP = "workout_export_as_zip"
+
+        /** Before delete; see the menu resource. */
+        private const val UPLOAD_MENU_ORDER = 50
     }
 }
