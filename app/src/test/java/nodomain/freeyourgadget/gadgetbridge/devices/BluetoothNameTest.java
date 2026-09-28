@@ -291,6 +291,8 @@ public class BluetoothNameTest extends TestBase {
             put("UCS LS2", DeviceType.CARDO_LS24X);
             put("Health Scale", DeviceType.ONEBYONE_SCALE); // LeFu / 1byone / Veeway, #6695
             put("F8", DeviceType.F8SCALE); // #5748
+            put("Stratos 4 Pro", DeviceType.ZEBLAZE_STRATOS_4_PRO); // #6884
+            put("Stratos 4 Pro 2", null); // #6884
         }};
 
         for (Map.Entry<String, DeviceType> e : bluetoothNameToExpectedType.entrySet()) {
