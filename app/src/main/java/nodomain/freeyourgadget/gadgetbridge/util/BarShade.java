@@ -2,6 +2,7 @@ package nodomain.freeyourgadget.gadgetbridge.util;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -60,6 +61,11 @@ public final class BarShade {
         ViewTreeObserver.OnGlobalLayoutListener, Runnable {
 
         private final View root;
+        @Nullable
+        private final ColorDrawable divider;
+        private final int dividerHeight;
+        @Nullable
+        private ViewGroup dividerHost;
         private View topShadeView;
         private View bottomShadeView;
         private Fader topShade;
@@ -69,6 +75,9 @@ public final class BarShade {
 
         public ScrollListener(final View root) {
             this.root = root;
+            final int dividerColor = MaterialColors.getColor(root.getContext(), R.attr.toolbar_divider, Color.TRANSPARENT);
+            divider = dividerColor != Color.TRANSPARENT ? new ColorDrawable(dividerColor) : null;
+            dividerHeight = Math.max(1, Math.round(root.getResources().getDisplayMetrics().density));
             root.getViewTreeObserver().addOnScrollChangedListener(this);
             root.getViewTreeObserver().addOnGlobalLayoutListener(this);
         }
@@ -77,6 +86,7 @@ public final class BarShade {
             root.getViewTreeObserver().removeOnScrollChangedListener(this);
             root.getViewTreeObserver().removeOnGlobalLayoutListener(this);
             root.removeCallbacks(this);
+            moveDivider(null);
         }
 
         public void setTopShade(@Nullable final View shade) {
@@ -85,7 +95,22 @@ public final class BarShade {
             }
             topShadeView = shade;
             topShade = replace(topShade, shade);
+            moveDivider(shade);
             postUpdate();
+        }
+
+        private void moveDivider(@Nullable final View shade) {
+            if (divider == null) {
+                return;
+            }
+            if (dividerHost != null) {
+                dividerHost.getOverlay().remove(divider);
+                dividerHost = null;
+            }
+            if (shade != null && shade.getParent() instanceof ViewGroup) {
+                dividerHost = (ViewGroup) shade.getParent();
+                dividerHost.getOverlay().add(divider);
+            }
         }
 
         public void setBottomShade(@Nullable final View shade) {
@@ -117,6 +142,10 @@ public final class BarShade {
             }
             final boolean atTop = scrolling == null || !scrolling.canScrollVertically(-1);
             final boolean atBottom = scrolling == null || !scrolling.canScrollVertically(1);
+            if (dividerHost != null && topShadeView != null) {
+                divider.setBounds(topShadeView.getLeft(), topShadeView.getTop(),
+                    topShadeView.getRight(), topShadeView.getTop() + dividerHeight);
+            }
             if (topShade != null) {
                 if (scrolling != null) {
                     align(topShadeView, scrolling, true);
