@@ -33,6 +33,7 @@ import nodomain.freeyourgadget.gadgetbridge.activities.AbstractGBActivity
 import nodomain.freeyourgadget.gadgetbridge.activities.HeartRateUtils
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.DurationXLabelFormatter
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.HeartRateZoneChartUtils
+import nodomain.freeyourgadget.gadgetbridge.activities.charts.IntervalChartUtils
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.marker.ValueMarker
 import nodomain.freeyourgadget.gadgetbridge.databinding.WorkoutChartsBinding
 import nodomain.freeyourgadget.gadgetbridge.model.heartratezones.HeartRateZonesResolver
@@ -47,6 +48,7 @@ class WorkoutChartsActivity : AbstractGBActivity(), MenuProvider {
 
     // Selectable overlays drawn on top of the compared charts.
     private var showHrZones = false
+    private var showIntervals = false
 
     private var menu: Menu? = null
 
@@ -160,6 +162,20 @@ class WorkoutChartsActivity : AbstractGBActivity(), MenuProvider {
             }
             group.addView(chip)
         }
+        // Interval splits: only offered when the workout actually has distinct interval phases.
+        if (IntervalChartUtils.hasIntervalPhases(ChartDataRepository.intervals)) {
+            val chip = Chip(this).apply {
+                text = context.getString(R.string.workout_intervals)
+                isCheckable = true
+                isClickable = true
+                isChecked = false
+            }
+            chip.setOnCheckedChangeListener { _, isChecked ->
+                showIntervals = isChecked
+                refreshChart()
+            }
+            group.addView(chip)
+        }
     }
 
     fun refreshChart() {
@@ -232,6 +248,9 @@ class WorkoutChartsActivity : AbstractGBActivity(), MenuProvider {
         for (lineSet in metricLineSets) {
             lineData.addDataSet(lineSet)
         }
+        if (showIntervals) {
+            addIntervalOverlay()
+        }
         if (selectedCharts.size == 1) {
             val selectedChartId = selectedCharts.first()
             val workoutChart = chartData?.find { it.id == selectedChartId } ?: return
@@ -282,6 +301,13 @@ class WorkoutChartsActivity : AbstractGBActivity(), MenuProvider {
             limit.enableDashedLine(6f, 6f, 0f)
             axisObj.addLimitLine(limit)
         }
+    }
+
+    /** Draws vertical interval-boundary lines on the time axis. */
+    private fun addIntervalOverlay() {
+        val textColor = GBApplication.getTextColor(context)
+        IntervalChartUtils.boundaryLines(context, ChartDataRepository.intervals, textColor)
+            .forEach { binding.workoutDataChart.xAxis.addLimitLine(it) }
     }
 
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {

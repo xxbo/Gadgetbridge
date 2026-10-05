@@ -25,6 +25,7 @@ import nodomain.freeyourgadget.gadgetbridge.R
 import nodomain.freeyourgadget.gadgetbridge.activities.ActivitySummariesChartFragment
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.DurationXLabelFormatter
 import nodomain.freeyourgadget.gadgetbridge.activities.charts.HeartRateZoneChartUtils
+import nodomain.freeyourgadget.gadgetbridge.activities.charts.IntervalChartUtils
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.charts.ChartDataRepository
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.charts.WorkoutChartsActivity
 import nodomain.freeyourgadget.gadgetbridge.activities.workouts.entries.ActivitySummaryEntry
@@ -225,6 +226,10 @@ class WorkoutTabChartsFragment : Fragment(), WorkoutTabScreenshotProvider {
                 })
             }
         }
+        if (IntervalChartUtils.hasIntervalPhases(workout.intervals)) {
+            IntervalChartUtils.boundaryLines(requireContext(), workout.intervals, chartTextColor)
+                .forEach { lineChart.xAxis.addLimitLine(it) }
+        }
         chart.lineChart(lineChart);
         when {
             lineChart is LineChart && chart.chartData is LineData -> {
@@ -241,6 +246,7 @@ class WorkoutTabChartsFragment : Fragment(), WorkoutTabScreenshotProvider {
             override fun onChartGestureEnd(me: MotionEvent?, lastPerformedGesture: ChartTouchListener.ChartGesture?) {}
             override fun onChartSingleTapped(me: MotionEvent?) {
                 ChartDataRepository.chartData = workout.charts
+                ChartDataRepository.intervals = workout.intervals
                 val intent = Intent(requireContext(), WorkoutChartsActivity::class.java).apply {
                     putExtra(WorkoutChartsActivity.INIT_CHART_ID, chart.id)
                     workoutLabel()?.let {
