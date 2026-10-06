@@ -69,7 +69,6 @@
     <!-- Unfilled track of the dashboard gauges -->
     <attr name="gauge_track" format="color" />
     <attr name="grid_tile_bg" format="color" />
-    <attr name="device_card_bg" format="color" />
     <attr name="toolbar_divider" format="color" />
     <attr name="bottom_bar_divider" format="reference" />
 

@@ -51,7 +51,6 @@
         <item name="row_separator">@color/row_separator_light</item>
         <item name="stat_tile_bg">?attr/colorSurface</item>
         <item name="grid_tile_bg">?android:attr/windowBackground</item>
-        <item name="device_card_bg">?attr/colorSurfaceContainer</item>
         <item name="bottom_bar_divider">@null</item>
         <item name="stat_tile_border">?attr/colorOutlineVariant</item>
         <item name="activity_icon_bg">?attr/colorSurfaceContainerHigh</item>
@@ -160,7 +159,6 @@
         <item name="row_separator">@color/row_separator_dark</item>
         <item name="stat_tile_bg">?attr/colorSurface</item>
         <item name="grid_tile_bg">?android:attr/windowBackground</item>
-        <item name="device_card_bg">?attr/colorSurfaceContainer</item>
         <item name="bottom_bar_divider">@null</item>
         <item name="stat_tile_border">?attr/colorOutlineVariant</item>
         <item name="activity_icon_bg">?attr/colorSurfaceContainerHigh</item>
@@ -244,7 +242,6 @@
         <item name="row_separator">@color/row_separator_light</item>
         <item name="stat_tile_bg">?attr/colorSurface</item>
         <item name="grid_tile_bg">?android:attr/windowBackground</item>
-        <item name="device_card_bg">?attr/colorSurfaceContainer</item>
         <item name="bottom_bar_divider">@null</item>
         <item name="stat_tile_border">?attr/colorOutlineVariant</item>
         <item name="activity_icon_bg">?attr/colorSurfaceContainerHigh</item>
@@ -311,7 +308,6 @@
         <item name="row_separator">@color/row_separator_dark</item>
         <item name="stat_tile_bg">?attr/colorSurface</item>
         <item name="grid_tile_bg">?android:attr/windowBackground</item>
-        <item name="device_card_bg">?attr/colorSurfaceContainer</item>
         <item name="bottom_bar_divider">@null</item>
         <item name="stat_tile_border">?attr/colorOutlineVariant</item>
         <item name="activity_icon_bg">?attr/colorSurfaceContainerHigh</item>
@@ -830,7 +826,6 @@
         <item name="toolbar_bg">@color/surface_contrasting_light</item>
         <item name="stat_tile_bg">@color/surface_contrasting_light</item>
         <item name="grid_tile_bg">@color/surface_contrasting_light</item>
-        <item name="device_card_bg">@color/surface_contrasting_light</item>
         <item name="activity_icon_bg">@color/surface_contrasting_light</item>
         <item name="toolbar_divider">@color/toolbar_divider_contrasting_light</item>
         <item name="bottom_bar_divider">@drawable/bottom_bar_divider</item>
