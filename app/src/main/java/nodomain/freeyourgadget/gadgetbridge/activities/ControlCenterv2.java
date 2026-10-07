@@ -218,8 +218,10 @@ public class ControlCenterv2 extends AppCompatActivity
             final int itemId = menuItem.getItemId();
             if (itemId == R.id.bottom_nav_dashboard) {
                 viewPager.setCurrentItem(0, true);
-            } else if (itemId == R.id.bottom_nav_devices) {
+            } else if (itemId == R.id.bottom_nav_workouts) {
                 viewPager.setCurrentItem(1, true);
+            } else if (itemId == R.id.bottom_nav_devices) {
+                viewPager.setCurrentItem(2, true);
             }
             return true;
         });
@@ -508,6 +510,8 @@ public class ControlCenterv2 extends AppCompatActivity
         public Fragment createFragment(int position) {
             if (position == 0) {
                 return new DashboardFragment();
+            } else if (position == 1) {
+                return new WorkoutsFragment();
             } else {
                 return new DevicesFragment();
             }
@@ -515,7 +519,7 @@ public class ControlCenterv2 extends AppCompatActivity
 
         @Override
         public int getItemCount() {
-            return 2;
+            return 3;
         }
     }
 }

@@ -4697,6 +4697,7 @@
     <string name="activity_type_ccr_diving">Closed-Circuit Rebreather</string>
     <string name="dashboard_settings">Dashboard settings</string>
     <string name="bottom_nav_dashboard">Dashboard</string>
+    <string name="bottom_nav_workouts">Workouts</string>
     <string name="bottom_nav_devices">Devices</string>
     <string name="pref_dashboard_first_title">Show dashboard first</string>
     <string name="pref_dashboard_first_summary">Show the dashboard when Gadgetbridge starts, instead of the devices screen</string>
