@@ -5,5 +5,5 @@
     <gradient
         android:angle="270"
         android:endColor="@color/bar_shade_amoled_end"
-        android:startColor="@color/toolbar_bg_contrasting_amoled" />
+        android:startColor="@color/stat_tile_bg_amoled" />
 </shape>
