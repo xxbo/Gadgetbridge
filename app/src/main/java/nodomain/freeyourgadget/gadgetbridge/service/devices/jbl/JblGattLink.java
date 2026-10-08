@@ -103,6 +103,7 @@ final class JblGattLink {
      */
     private int pendingOperations;
     private boolean operationsWatchdogArmed;
+    @SuppressLint("MissingPermission")
     private final Runnable operationsWatchdog = () -> {
         operationsWatchdogArmed = false;
         if (pendingOperations > 0) {
@@ -606,6 +607,7 @@ final class JblGattLink {
         }
 
         @Override
+        @SuppressLint("MissingPermission")
         public void onMtuChanged(@NonNull final BluetoothGatt gatt, final int mtu, final int status) {
             dispatchHandler.post(() -> {
                 if (!isCurrentGatt(gatt) || disposed.get()) {

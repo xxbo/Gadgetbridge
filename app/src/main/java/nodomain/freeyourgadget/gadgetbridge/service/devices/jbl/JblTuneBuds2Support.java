@@ -9,6 +9,7 @@
 */
 package nodomain.freeyourgadget.gadgetbridge.service.devices.jbl;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
@@ -60,6 +61,7 @@ import static nodomain.freeyourgadget.gadgetbridge.service.devices.jbl.JblProtoc
  *       re-scan.</li>
  * </ol>
  */
+@SuppressLint("MissingPermission") // if we're using this, we have bluetooth permissions
 public class JblTuneBuds2Support extends AbstractDeviceSupport implements JblGattLink.Sink {
     private static final Logger LOG = LoggerFactory.getLogger(JblTuneBuds2Support.class);
 
