@@ -86,7 +86,7 @@ public class XiaomiWorkoutStatsWatchTest extends TestBase {
     }
 
     private void openSession() {
-        health.startRawSensor(true);
+        health.startRawSensor(true, false);
         idle(OPEN_DELAY_MS);
     }
 
@@ -221,7 +221,7 @@ public class XiaomiWorkoutStatsWatchTest extends TestBase {
         deliverStats(WorkoutStatsWatch.newBuilder().setCalories(5));
         idle(FULL_INTERVAL_MS);
 
-        Mockito.verify(sender, Mockito.never()).onHrChanged(Mockito.anyFloat(), Mockito.anyLong());
+        Mockito.verify(sender, Mockito.never()).onHrChanged(Mockito.anyInt(), Mockito.anyInt());
         Assert.assertEquals(HEART_RATE_UNKNOWN, heartRateReportedToTheBand());
     }
 
@@ -229,7 +229,7 @@ public class XiaomiWorkoutStatsWatchTest extends TestBase {
     public void aWorkoutStartedOnTheWatchFeedsNothingToSleepAsAndroid() {
         deliverStats(WorkoutStatsWatch.newBuilder().setHeartRate(61));
 
-        Mockito.verify(sender, Mockito.never()).onHrChanged(Mockito.anyFloat(), Mockito.anyLong());
+        Mockito.verify(sender, Mockito.never()).onHrChanged(Mockito.anyInt(), Mockito.anyInt());
     }
 
     @Test

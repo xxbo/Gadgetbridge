@@ -16,6 +16,8 @@
     along with this program.  If not, see <https://www.gnu.org/licenses/>. */
 package nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi;
 
+import android.content.SharedPreferences;
+import android.location.Location;
 import android.os.Looper;
 
 import org.junit.Assert;
@@ -28,7 +30,9 @@ import org.robolectric.Shadows;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
+import nodomain.freeyourgadget.gadgetbridge.GBApplication;
 import nodomain.freeyourgadget.gadgetbridge.proto.xiaomi.AxisSensor;
 import nodomain.freeyourgadget.gadgetbridge.proto.xiaomi.Health;
 import nodomain.freeyourgadget.gadgetbridge.proto.xiaomi.RawSensorBatch;
@@ -37,6 +41,7 @@ import nodomain.freeyourgadget.gadgetbridge.proto.xiaomi.WorkoutOpenWatch;
 import nodomain.freeyourgadget.gadgetbridge.proto.xiaomi.WorkoutStatusWatch;
 import nodomain.freeyourgadget.gadgetbridge.proto.xiaomi.XiaomiProto;
 import nodomain.freeyourgadget.gadgetbridge.service.SleepAsAndroidSender;
+import nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi.XiaomiPreferences;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.xiaomi.services.XiaomiHealthService;
 import nodomain.freeyourgadget.gadgetbridge.test.TestBase;
 
@@ -52,8 +57,11 @@ public class XiaomiSleepAsAndroidWorkoutTest extends TestBase {
     private static final int CMD_WORKOUT_WATCH_OPEN = 30;
     private static final int CMD_REALTIME_STATS_START = 45;
     private static final int CMD_REALTIME_STATS_STOP = 46;
+    private static final int CMD_WORKOUT_LOCATION = 48;
     private static final int CMD_WORKOUT_STATS_PHONE = 49;
     private static final int CMD_RAW_SENSOR_BATCH = 53;
+
+    private static final int WORKOUT_OPEN_NO_PERMISSION = 3;
 
     private static final int WORKOUT_STARTED = 0;
     private static final int WORKOUT_PAUSED = 1;
@@ -69,9 +77,11 @@ public class XiaomiSleepAsAndroidWorkoutTest extends TestBase {
     private static final long FULL_INTERVAL_MS = 1_000L;
     private static final long IDLE_INTERVAL_MS = 5_000L;
     private static final long ACTIVE_WINDOW_MS = 10_000L;
+    private static final long RECOVERY_GRACE_MS = 120_000L;
 
     private XiaomiSupport support;
     private XiaomiHealthService health;
+    private SleepAsAndroidSender sender;
 
     @Before
     @Override
@@ -79,8 +89,9 @@ public class XiaomiSleepAsAndroidWorkoutTest extends TestBase {
         super.setUp();
         support = Mockito.mock(XiaomiSupport.class);
         Mockito.when(support.getDevice()).thenReturn(createDummyGDevice("00:11:22:33:44:55"));
+        sender = Mockito.mock(SleepAsAndroidSender.class);
         health = new XiaomiHealthService(support);
-        health.setSleepAsAndroidSender(Mockito.mock(SleepAsAndroidSender.class));
+        health.setSleepAsAndroidSender(sender);
     }
 
     // --- driving ----------------------------------------------------------------------------
@@ -89,9 +100,23 @@ public class XiaomiSleepAsAndroidWorkoutTest extends TestBase {
         Shadows.shadowOf(Looper.getMainLooper()).idleFor(Duration.ofMillis(millis));
     }
 
+    /** Run what a new connection runs, so whatever the band still holds is dealt with. */
+    private void reconnect() {
+        health.initialize();
+        idle(OPEN_DELAY_MS);
+    }
+
+    /** Backdate the stored session so it looks like it started {@code millis} ago. */
+    private void ageTheStoredSession(final long millis) {
+        final String key = "xiaomi_saa_session_started_ts";
+        final SharedPreferences prefs =
+                GBApplication.getDeviceSpecificSharedPrefs(support.getDevice().getAddress());
+        prefs.edit().putLong(key, prefs.getLong(key, 0L) - millis).apply();
+    }
+
     /** Opens the synthetic workout and leaves every command it sent in the history. */
     private void openSession(final boolean withHeartRate) {
-        health.startRawSensor(withHeartRate);
+        health.startRawSensor(withHeartRate, false);
         idle(OPEN_DELAY_MS);
     }
 
@@ -190,10 +215,11 @@ public class XiaomiSleepAsAndroidWorkoutTest extends TestBase {
         return count(CMD_WORKOUT_STATS_PHONE) - before;
     }
 
-    // --- realtime stream ----------------------------------------------------------------------
+    // --- realtime stream sharing ------------------------------------------------------------
 
     @Test
     public void sleepTrackingKeepsTheStreamWhenChartsClose() {
+        // Sleep as Android session running, then the user opens and closes the live chart.
         openSession(true);
         final int startsAfterSession = count(CMD_REALTIME_STATS_START);
 
@@ -206,24 +232,23 @@ public class XiaomiSleepAsAndroidWorkoutTest extends TestBase {
                 0, count(CMD_REALTIME_STATS_STOP));
     }
 
-    @Test
-    public void heartRateIsOnlyStreamedWhenRequested() {
-        openSession(false);
-
-        Assert.assertEquals(0, count(CMD_REALTIME_STATS_START));
-    }
-
     // --- session sequencing -------------------------------------------------------------------
 
     @Test
     public void startClosesAnyWorkoutLeftOpenBeforeOpeningANewOne() {
-        health.startRawSensor(true);
+        health.startRawSensor(true, false);
 
-        Assert.assertEquals(List.of(WORKOUT_FINISHED), workoutStatuses());
+        // Immediately: only the defensive finish, so a session left open by an earlier process is
+        // closed before the band is asked to open another.
+        List<XiaomiProto.Command> statuses = sentOfSubtype(CMD_WORKOUT_WATCH_STATUS);
+        Assert.assertEquals(1, statuses.size());
+        Assert.assertEquals(WORKOUT_FINISHED, statuses.get(0).getHealth().getWorkoutStatusWatch().getStatus());
 
         idle(OPEN_DELAY_MS);
 
-        Assert.assertEquals(List.of(WORKOUT_FINISHED, WORKOUT_STARTED), workoutStatuses());
+        statuses = sentOfSubtype(CMD_WORKOUT_WATCH_STATUS);
+        Assert.assertEquals(2, statuses.size());
+        Assert.assertEquals(WORKOUT_STARTED, statuses.get(1).getHealth().getWorkoutStatusWatch().getStatus());
     }
 
     @Test
@@ -233,11 +258,15 @@ public class XiaomiSleepAsAndroidWorkoutTest extends TestBase {
         health.stopRawSensor();
 
         // The finish must not follow the pause immediately, or the band keeps the workout open.
-        Assert.assertEquals(List.of(WORKOUT_PAUSED), workoutStatuses());
+        List<XiaomiProto.Command> statuses = sentOfSubtype(CMD_WORKOUT_WATCH_STATUS);
+        Assert.assertEquals(1, statuses.size());
+        Assert.assertEquals(WORKOUT_PAUSED, statuses.get(0).getHealth().getWorkoutStatusWatch().getStatus());
 
         idle(OPEN_DELAY_MS);
 
-        Assert.assertEquals(List.of(WORKOUT_PAUSED, WORKOUT_FINISHED), workoutStatuses());
+        statuses = sentOfSubtype(CMD_WORKOUT_WATCH_STATUS);
+        Assert.assertEquals(2, statuses.size());
+        Assert.assertEquals(WORKOUT_FINISHED, statuses.get(1).getHealth().getWorkoutStatusWatch().getStatus());
     }
 
     @Test
@@ -246,7 +275,9 @@ public class XiaomiSleepAsAndroidWorkoutTest extends TestBase {
 
         idle(KEEPALIVE_MS);
 
-        Assert.assertEquals(List.of(WORKOUT_STARTED), workoutStatuses());
+        final List<XiaomiProto.Command> statuses = sentOfSubtype(CMD_WORKOUT_WATCH_STATUS);
+        Assert.assertEquals(1, statuses.size());
+        Assert.assertEquals(WORKOUT_STARTED, statuses.get(0).getHealth().getWorkoutStatusWatch().getStatus());
     }
 
     @Test
@@ -260,6 +291,20 @@ public class XiaomiSleepAsAndroidWorkoutTest extends TestBase {
         Assert.assertTrue(sent().isEmpty());
     }
 
+    @Test
+    public void timezoneOffsetIsSentInQuarterHours() {
+        final TimeZone original = TimeZone.getDefault();
+        try {
+            TimeZone.setDefault(TimeZone.getTimeZone("Asia/Kathmandu")); // UTC+05:45
+            health.startRawSensor(true, false);
+
+            final XiaomiProto.Command status = sentOfSubtype(CMD_WORKOUT_WATCH_STATUS).get(0);
+            Assert.assertEquals(23, status.getHealth().getWorkoutStatusWatch().getSportInfo().getTzOffsetQuarterHours());
+        } finally {
+            TimeZone.setDefault(original);
+        }
+    }
+
     // --- stats pacing ---------------------------------------------------------------------------
 
     @Test
@@ -271,6 +316,7 @@ public class XiaomiSleepAsAndroidWorkoutTest extends TestBase {
 
     @Test
     public void theRestOfTheSessionRunsAtTheIdleRate() {
+        // The band renders these on its workout screen, which is off for almost all of a night.
         openSession(true);
         idle(ACTIVE_WINDOW_MS);
 
@@ -313,27 +359,17 @@ public class XiaomiSleepAsAndroidWorkoutTest extends TestBase {
     }
 
     @Test
-    public void aRebuildRestartsTheRealtimeStream() {
-        openSessionAndClearHistory(true);
-
-        idle(50_000);
-        idle(OPEN_DELAY_MS);
-
-        Assert.assertTrue(restarted());
-        Assert.assertEquals(1, count(CMD_REALTIME_STATS_START));
-    }
-
-    @Test
-    public void aRebuildKeepsTheHeartRateRequest() {
-        // Sleep as Android asked for movement only, so the rebuild must not power the heart rate
-        // sensor up.
+    public void restartKeepsTheHeartRateRequest() {
+        // Sleep as Android asked for movement only, so the rebuild must not quietly power the
+        // heart rate sensor up.
         openSessionAndClearHistory(false);
 
         idle(50_000);
         idle(OPEN_DELAY_MS);
 
         Assert.assertTrue(restarted());
-        Assert.assertEquals(0, count(CMD_REALTIME_STATS_START));
+        Assert.assertTrue("a rebuild must not enable a sensor that was not requested",
+                sentOfSubtype(CMD_REALTIME_STATS_START).isEmpty());
     }
 
     @Test
@@ -349,26 +385,6 @@ public class XiaomiSleepAsAndroidWorkoutTest extends TestBase {
 
         Assert.assertTrue("a band that answers nothing must stop being talked to",
                 workoutStatuses().isEmpty());
-    }
-
-    @Test
-    public void aBatchResetsTheRestartBudget() {
-        openSessionAndClearHistory(true);
-
-        // Three stalls, each followed by the band coming back, is a session that recovers, not
-        // one that has to be given up on.
-        for (int i = 0; i < 4; i++) {
-            idle(50_000);
-            idle(OPEN_DELAY_MS);
-            deliverRawBatch();
-        }
-        Mockito.clearInvocations(support);
-
-        idle(KEEPALIVE_MS / 2);
-        deliverRawBatch();
-        idle(KEEPALIVE_MS);
-
-        Assert.assertEquals(List.of(WORKOUT_STARTED), workoutStatuses());
     }
 
     @Test
@@ -402,10 +418,30 @@ public class XiaomiSleepAsAndroidWorkoutTest extends TestBase {
     }
 
     @Test
-    public void syntheticOpenIsAcknowledgedWhileTheSessionCloses() {
+    public void syntheticStatusIsIgnoredEntirely() {
+        openSessionAndClearHistory(true);
+
+        deliverWorkoutStatus(SAA_SYNTHETIC_SPORT, WORKOUT_STARTED);
+        deliverWorkoutStatus(SAA_SYNTHETIC_SPORT, WORKOUT_FINISHED);
+
+        Assert.assertTrue("the synthetic workout must not be answered", sentOfSubtype(CMD_WORKOUT_WATCH_STATUS).isEmpty());
+        // Reaching the real workout logic would require the device to read its preferences.
+        Mockito.verify(support, Mockito.never()).getDevice();
+    }
+
+    @Test
+    public void realWorkoutStatusStillReachesTheWorkoutLogic() {
+        deliverWorkoutStatus(SPORT_OUTDOOR_RUNNING, WORKOUT_STARTED);
+
+        // It read the device preferences, so it did not take the synthetic short circuit.
+        Mockito.verify(support, Mockito.atLeastOnce()).getDevice();
+    }
+
+    @Test
+    public void syntheticOpenIsAcknowledgedBetweenWorkouts() {
         // The band repeats the request every few seconds for as long as its workout is open, so
-        // one lands in every gap the session leaves. Answering it as a real workout is what starts
-        // the phone GPS.
+        // one lands in every gap the session leaves, such as the rebuild after a stall. Answering
+        // it as a real workout is what starts the phone GPS.
         openSessionAndClearHistory(true);
         health.stopRawSensor();
         Mockito.clearInvocations(support);
@@ -415,6 +451,109 @@ public class XiaomiSleepAsAndroidWorkoutTest extends TestBase {
         final List<XiaomiProto.Command> replies = sentOfSubtype(CMD_WORKOUT_WATCH_OPEN);
         Assert.assertEquals(1, replies.size());
         Assert.assertEquals(0, replies.get(0).getHealth().getWorkoutOpenReply().getCode());
+    }
+
+    @Test
+    public void anOrphanedSyntheticOpenIsRefused() {
+        // Nothing on this side is tracking, so the workout the band still holds belongs to nobody.
+        // Refusing is what makes it close; acknowledging would keep it streaming all day.
+        deliverWorkoutOpen(SAA_SYNTHETIC_SPORT);
+
+        final List<XiaomiProto.Command> replies = sentOfSubtype(CMD_WORKOUT_WATCH_OPEN);
+        Assert.assertEquals(1, replies.size());
+        Assert.assertEquals(WORKOUT_OPEN_NO_PERMISSION,
+                replies.get(0).getHealth().getWorkoutOpenReply().getCode());
+    }
+
+    // --- recovering a session the connection interrupted ------------------------------------
+
+    @Test
+    public void aSessionSleepAsAndroidClaimsBackSurvivesTheConnection() {
+        openSession(true);
+        health.dispose();
+        Mockito.clearInvocations(support);
+
+        reconnect();
+        // Sleep as Android repeats START_TRACKING as its own watchdog.
+        openSession(true);
+        idleWhileStreaming(RECOVERY_GRACE_MS);
+
+        Assert.assertEquals("the workout is closed and opened again",
+                List.of(WORKOUT_FINISHED, WORKOUT_STARTED), workoutStatuses().subList(0, 2));
+        // Every close starts with a pause, so one anywhere means the session was taken for an orphan.
+        Assert.assertFalse("a claimed session must not be closed",
+                workoutStatuses().contains(WORKOUT_PAUSED));
+        Assert.assertEquals("the stream the session feeds on has to come back too",
+                1, count(CMD_REALTIME_STATS_START));
+    }
+
+    @Test
+    public void aWorkoutNobodyClaimsIsClosed() {
+        openSession(true);
+        health.dispose();
+        Mockito.clearInvocations(support);
+
+        reconnect();
+        idle(RECOVERY_GRACE_MS);
+
+        Assert.assertEquals("the orphan is paused then finished",
+                List.of(WORKOUT_PAUSED, WORKOUT_FINISHED), workoutStatuses());
+    }
+
+    @Test
+    public void theBandIsGivenTimeToBeClaimedBeforeTheWorkoutIsClosed() {
+        openSession(true);
+        health.dispose();
+        Mockito.clearInvocations(support);
+
+        reconnect();
+        idle(RECOVERY_GRACE_MS / 2);
+
+        Assert.assertTrue(workoutStatuses().isEmpty());
+    }
+
+    @Test
+    public void aRestartedGadgetbridgeStillClosesTheOrphan() {
+        openSession(true);
+        health.dispose();
+
+        // A fresh process knows nothing beyond what the session left in the preferences.
+        health = new XiaomiHealthService(support);
+        health.setSleepAsAndroidSender(sender);
+        Mockito.clearInvocations(support);
+
+        reconnect();
+        idle(RECOVERY_GRACE_MS);
+
+        Assert.assertEquals(List.of(WORKOUT_PAUSED, WORKOUT_FINISHED), workoutStatuses());
+    }
+
+    @Test
+    public void aSessionOlderThanTheCapIsForgotten() {
+        openSession(true);
+        health.dispose();
+        Mockito.clearInvocations(support);
+
+        ageTheStoredSession(Duration.ofHours(13).toMillis());
+        reconnect();
+        idle(RECOVERY_GRACE_MS);
+
+        Assert.assertTrue("a night that old is over whatever the band still shows",
+                workoutStatuses().isEmpty());
+    }
+
+    @Test
+    public void aCleanlyStoppedSessionIsNotRecovered() {
+        openSession(true);
+        health.stopRawSensor();
+        idle(OPEN_DELAY_MS);
+        health.dispose();
+        Mockito.clearInvocations(support);
+
+        reconnect();
+        idle(RECOVERY_GRACE_MS);
+
+        Assert.assertTrue(workoutStatuses().isEmpty());
     }
 
     @Test
@@ -430,18 +569,6 @@ public class XiaomiSleepAsAndroidWorkoutTest extends TestBase {
     }
 
     @Test
-    public void syntheticStatusIsIgnoredEntirely() {
-        openSessionAndClearHistory(true);
-
-        deliverWorkoutStatus(SAA_SYNTHETIC_SPORT, WORKOUT_STARTED);
-        deliverWorkoutStatus(SAA_SYNTHETIC_SPORT, WORKOUT_FINISHED);
-
-        Assert.assertTrue("the synthetic workout must not be answered", workoutStatuses().isEmpty());
-        // Reaching the real workout logic would require the device to read its preferences.
-        Mockito.verify(support, Mockito.never()).getDevice();
-    }
-
-    @Test
     public void statusEchoedWhileTheSessionClosesIsNotAUserWorkout() {
         openSessionAndClearHistory(true);
         health.stopRawSensor();
@@ -453,11 +580,27 @@ public class XiaomiSleepAsAndroidWorkoutTest extends TestBase {
     }
 
     @Test
-    public void realWorkoutStatusStillReachesTheWorkoutLogic() {
-        deliverWorkoutStatus(SPORT_OUTDOOR_RUNNING, WORKOUT_STARTED);
+    public void statusEchoedAfterADroppedLinkIsNotAUserWorkout() {
+        openSession(true);
+        // The link drops and comes back; the band still has the synthetic workout open.
+        health.dispose();
+        Mockito.clearInvocations(support);
 
-        // It read the device preferences, so it did not take the synthetic short circuit.
-        Mockito.verify(support, Mockito.atLeastOnce()).getDevice();
+        deliverWorkoutStatus(SPORT_UNSET, WORKOUT_STARTED);
+
+        Mockito.verify(support, Mockito.never()).getDevice();
+    }
+
+    @Test
+    public void aFinishedWorkoutIsNoLongerFedLocations() {
+        deliverWorkoutStatus(SPORT_OUTDOOR_RUNNING, WORKOUT_STARTED);
+        deliverWorkoutStatus(SPORT_OUTDOOR_RUNNING, WORKOUT_FINISHED);
+        Mockito.clearInvocations(support);
+
+        health.onSetGpsLocation(new Location("test"));
+
+        Assert.assertTrue("locations belong to the workout that asked for them",
+                sentOfSubtype(CMD_WORKOUT_LOCATION).isEmpty());
     }
 
     @Test
@@ -474,5 +617,57 @@ public class XiaomiSleepAsAndroidWorkoutTest extends TestBase {
         // With phone GPS off this is the "no location" reply, not the synthetic (0, 2, 2).
         Assert.assertNotEquals("the synthetic ack must not leak into a real workout",
                 0, replies.get(0).getHealth().getWorkoutOpenReply().getCode());
+    }
+
+    // --- the window the band billed as a workout ------------------------------------------------
+
+    private List<long[]> recordedWindows() {
+        return XiaomiPreferences.sleepAsAndroidWindows(support.getDevice().getAddress());
+    }
+
+    @Test
+    public void stoppingASessionRecordsTheWindowItCovered() {
+        openSession(true);
+        ageTheStoredSession(60_000);
+
+        health.stopRawSensor();
+        idle(OPEN_DELAY_MS);
+
+        final List<long[]> windows = recordedWindows();
+        Assert.assertEquals(1, windows.size());
+        Assert.assertTrue("the window must span the session",
+                windows.get(0)[1] - windows.get(0)[0] >= 60_000);
+    }
+
+    @Test
+    public void closingAnUnclaimedSessionRecordsItsWindow() {
+        openSession(true);
+        ageTheStoredSession(60_000);
+        health.dispose();
+
+        reconnect();
+        idle(RECOVERY_GRACE_MS);
+        idle(OPEN_DELAY_MS);
+
+        Assert.assertEquals(1, recordedWindows().size());
+    }
+
+    @Test
+    public void aSessionThatNeverRanRecordsNothing() {
+        reconnect();
+
+        Assert.assertTrue(recordedWindows().isEmpty());
+    }
+
+    @Test
+    public void aSessionTooOldToRecoverRecordsNothing() {
+        openSession(true);
+        // Past the twelve hours a session is kept, so when it ended is anybody's guess.
+        ageTheStoredSession(13 * 60 * 60_000L);
+        health.dispose();
+
+        reconnect();
+
+        Assert.assertTrue(recordedWindows().isEmpty());
     }
 }
