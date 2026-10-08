@@ -22,6 +22,7 @@ import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDeviceCandidate;
 import nodomain.freeyourgadget.gadgetbridge.model.BatteryConfig;
 import nodomain.freeyourgadget.gadgetbridge.service.DeviceSupport;
+import nodomain.freeyourgadget.gadgetbridge.service.btle.BluetoothCompanyIdentifiers;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.jbl.JblProtocol;
 import nodomain.freeyourgadget.gadgetbridge.service.devices.jbl.JblTuneBuds2Support;
 
@@ -59,11 +60,12 @@ public class JblTuneBuds2Coordinator extends GenericHeadphonesCoordinator {
 
     @Override
     public boolean supports(@NonNull GBDeviceCandidate candidate) {
-        // The Harman manufacturer ID is shared by many JBL devices, and the legacy
+        // The manufacturer ID is shared by many JBL devices, and the legacy
         // service UUID is not model-specific. Only accept the Tune Buds 2 PID from
         // manufacturer data; the scanner applies the same PID check before connecting.
 
-        final byte[] harman = candidate.getManufacturerSpecificData().get(JblProtocol.HARMAN_MANUFACTURER_ID);
+        final byte[] harman = candidate.getManufacturerSpecificData().get(
+                BluetoothCompanyIdentifiers.ZHONGSHAN_CITY_RICHSOUND_ELECTRONIC_INDUSTRIAL_LTD);
         if (harman != null && harman.length >= 2
                 && (harman[0] & 0xff) == (JblProtocol.TUNE_BUDS_2_PRODUCT_ID & 0xff)
                 && (harman[1] & 0xff) == ((JblProtocol.TUNE_BUDS_2_PRODUCT_ID >>> 8) & 0xff)) {

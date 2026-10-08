@@ -19,7 +19,6 @@ public final class JblProtocol {
     }
 
     public static final byte HEADER_MAGIC = (byte) 0xAA;
-    public static final int HARMAN_MANUFACTURER_ID = 3787; // 0x0ECB
     public static final int TUNE_BUDS_2_PRODUCT_ID = 0x210c;
 
     // Legacy Harman service-data key carrying the PID/CRC advertisement.

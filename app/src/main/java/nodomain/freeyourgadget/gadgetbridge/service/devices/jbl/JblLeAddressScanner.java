@@ -41,6 +41,8 @@ import org.slf4j.LoggerFactory;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static nodomain.freeyourgadget.gadgetbridge.service.btle.BluetoothCompanyIdentifiers.ZHONGSHAN_CITY_RICHSOUND_ELECTRONIC_INDUSTRIAL_LTD;
+
 /**
  * Resolves the rotating BLE session address of a paired JBL TWS headset.
  *
@@ -213,7 +215,7 @@ final class JblLeAddressScanner {
         if (record == null) {
             return false;
         }
-        byte[] data = record.getManufacturerSpecificData(JblProtocol.HARMAN_MANUFACTURER_ID);
+        byte[] data = record.getManufacturerSpecificData(ZHONGSHAN_CITY_RICHSOUND_ELECTRONIC_INDUSTRIAL_LTD);
         if (data == null || data.length < 2
                 || littleEndian16(data, 0) != JblProtocol.TUNE_BUDS_2_PRODUCT_ID) {
             data = record.getServiceData(ParcelUuid.fromString(JblProtocol.HARMAN_LEGACY_SERVICE_UUID_STR));
