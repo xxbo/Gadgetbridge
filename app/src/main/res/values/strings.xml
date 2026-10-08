@@ -3603,12 +3603,7 @@
     <string name="pref_title_equalizer_smooth">Smooth</string>
     <string name="pref_title_equalizer_energize">Energize</string>
     <string name="pref_title_equalizer_natural">Natural</string>
-    <string name="pref_title_equalizer_jazz">Jazz</string>
-    <string name="pref_title_equalizer_vocal">Vocal</string>
-    <string name="pref_title_equalizer_bass">Bass</string>
-    <string name="pref_title_equalizer_club">Club</string>
-    <string name="pref_title_equalizer_studio">Studio</string>
-    <string name="pref_title_equalizer_extreme_bass">Extreme Bass</string>
+    
     <string name="prefs_dolby_mode">Dolby Mode</string>
     <string name="prefs_equalizer">Equalizer</string>
     <string name="prefs_equalizer_summary">Enable or disable equalizer</string>

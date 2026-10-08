@@ -69,18 +69,10 @@ fun jblTuneBuds2Settings(): DeviceSettingsSpec = deviceSettings {
     }
 
     category(
-        key = "pref_jbl_tune_buds_2_category_audio",
-        title = R.string.pref_header_audio,
+        key = "pref_jbl_tune_buds_2_category_equalizer",
+        title = R.string.prefs_equalizer,
+        visibleWhen = soundModeIsNot(SOUND_MODE_TALK_THRU),
     ) {
-        list(
-            key = JblTuneBuds2Support.PREF_EQ_PRESET,
-            title = R.string.prefs_equalizer_preset,
-            icon = R.drawable.ic_equalizer,
-            entriesRes = R.array.jbl_tune_buds_2_eq_preset_entries,
-            entryValuesRes = R.array.jbl_tune_buds_2_eq_preset_values,
-            defaultValue = EQ_PRESET_DEFAULT,
-            visibleWhen = soundModeIsNot(SOUND_MODE_TALK_THRU),
-        )
         for (band in EQ_BANDS) {
             seekbar(
                 key = band.key,
@@ -88,9 +80,14 @@ fun jblTuneBuds2Settings(): DeviceSettingsSpec = deviceSettings {
                 min = -6,
                 max = 6,
                 defaultValue = 0,
-                visibleWhen = prefIs(JblTuneBuds2Support.PREF_EQ_PRESET, EQ_PRESET_CUSTOM, EQ_PRESET_DEFAULT),
             )
         }
+    }
+
+    category(
+        key = "pref_jbl_tune_buds_2_category_audio",
+        title = R.string.pref_header_audio,
+    ) {
         list(
             key = JblTuneBuds2Support.PREF_SPATIAL_AUDIO,
             title = R.string.pref_spatial_audio,
@@ -217,9 +214,6 @@ private const val SOUND_MODE_OFF = "0"
 private const val SOUND_MODE_ANC = "1"
 private const val SOUND_MODE_TALK_THRU = "2"
 private const val SOUND_MODE_AMBIENT = "3"
-
-private const val EQ_PRESET_DEFAULT = "0"
-private const val EQ_PRESET_CUSTOM = "255"
 
 private const val GESTURE_AMBIENT_SOUND_CONTROL = "1"
 private const val GESTURE_PLAYBACK_CONTROL = "2"

@@ -42,9 +42,6 @@ public final class JblProtocol {
     public static final byte CMD_EAR_BEEPING            = 0x36;
     public static final byte CMD_BATTERY_STATUS         = 0x25;
     public static final byte CMD_AUTO_POWER_OFF         = 0x33;
-    public static final byte CMD_EQ_PRESET              = 0x40;
-    public static final byte CMD_CUSTOM_EQ              = 0x41;
-    public static final byte CMD_EQ_QUERY               = 0x42;
     public static final byte CMD_EQ_SETTINGS_2          = (byte) 0xa2;
     public static final byte CMD_GESTURE_CONFIG         = 0x77;
     public static final byte CMD_SMART_AUDIO_VIDEO      = (byte) 0x80;
@@ -91,11 +88,6 @@ public final class JblProtocol {
     public static final byte FEATURE_BATTERY_CASE             = 0x1c;
     public static final byte FEATURE_SAFE_SOUND               = 0x20;
     public static final byte FEATURE_CALL_VOLUME_OPTIMIZER   = 0x23;
-
-    // Call Sound Effect Types
-    public static final int CALL_SOUND_EFFECT_NATURAL        = 0;
-    public static final int CALL_SOUND_EFFECT_TREBLE_BOOST   = 1;
-    public static final int CALL_SOUND_EFFECT_BASS_BOOST     = 2;
 
     // Spatial Audio Types
     public static final int SPATIAL_AUDIO_OFF                = 0;
@@ -151,10 +143,8 @@ public final class JblProtocol {
     public static final int GESTURE_ROLE_VOLUME_CONTROL      = 3;
     public static final int GESTURE_ROLE_VOICE_ASSISTANT     = 4;
 
-    // Voice Prompts & Tones
-    public static final int VOICE_PROMPT_TONE                = 0;
-    public static final int VOICE_PROMPT_VOICE               = 1;
-    public static final int VOICE_PROMPT_OFF                 = 2;
+    // Voice Prompts & Tones. The device only knows enabled/disabled.
+    public static final int VOICE_PROMPT_LANGUAGE            = 1;
 
     // Ear Beeping (Find My Buds) Actions
     public static final byte BEEP_STOP_RIGHT                 = 0x00;

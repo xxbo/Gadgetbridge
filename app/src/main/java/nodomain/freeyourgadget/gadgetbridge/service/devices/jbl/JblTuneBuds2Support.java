@@ -77,7 +77,6 @@ public class JblTuneBuds2Support extends AbstractDeviceSupport implements JblGat
     public static final String PREF_AUTO_COMPENSATION     = "pref_jbl_tune_buds_2_auto_compensation";
     public static final String PREF_ANC_LEVEL             = "pref_jbl_tune_buds_2_anc_level";
     public static final String PREF_AMBIENT_LEVEL         = "pref_jbl_tune_buds_2_ambient_level";
-    public static final String PREF_EQ_PRESET             = "pref_jbl_tune_buds_2_eq_preset";
     public static final String PREF_EQ_BAND_32            = "pref_jbl_tune_buds_2_eq_band_32";
     public static final String PREF_EQ_BAND_64            = "pref_jbl_tune_buds_2_eq_band_64";
     public static final String PREF_EQ_BAND_125           = "pref_jbl_tune_buds_2_eq_band_125";
@@ -132,7 +131,6 @@ public class JblTuneBuds2Support extends AbstractDeviceSupport implements JblGat
     private JblLeAddressScanner addressScanner;
     private boolean disposed;
     private boolean servicesDiscovered = false;
-    private volatile int requestedEqPreset = -1;
 
     public JblTuneBuds2Support() {
         super();
@@ -233,7 +231,6 @@ public class JblTuneBuds2Support extends AbstractDeviceSupport implements JblGat
             addressScanner.cancel();
             addressScanner = null;
         }
-        requestedEqPreset = -1;
         if (gattLink != null) {
             gattLink.dispose();
         }
@@ -244,7 +241,6 @@ public class JblTuneBuds2Support extends AbstractDeviceSupport implements JblGat
     @Override
     public synchronized void dispose() {
         disposed = true;
-        requestedEqPreset = -1;
         if (addressScanner != null) {
             addressScanner.cancel();
             addressScanner = null;
@@ -335,7 +331,6 @@ public class JblTuneBuds2Support extends AbstractDeviceSupport implements JblGat
             case BluetoothProfile.STATE_DISCONNECTED:
                 LOG.info("JBL: disconnected (status={})", status);
                 servicesDiscovered = false;
-                requestedEqPreset = -1;
 
                 // Keep the cached address only after the expected JBL GATT
                 // service and notifications were configured. A successful LE
@@ -456,7 +451,6 @@ public class JblTuneBuds2Support extends AbstractDeviceSupport implements JblGat
                 && !PREF_AUTO_COMPENSATION.equals(config)
                 && !PREF_ANC_LEVEL.equals(config)
                 && !PREF_AMBIENT_LEVEL.equals(config)
-                && !PREF_EQ_PRESET.equals(config)
                 && !PREF_EQ_BAND_32.equals(config)
                 && !PREF_EQ_BAND_64.equals(config)
                 && !PREF_EQ_BAND_125.equals(config)
@@ -521,18 +515,7 @@ public class JblTuneBuds2Support extends AbstractDeviceSupport implements JblGat
             } else if (mode == SOUND_MODE_AMBIENT && (PREF_AMBIENT_LEVEL.equals(config) || PREF_SOUND_MODE.equals(config))) {
                 write(WRITE_CHARACTERISTIC_UUID,
                         buildAmbientLevelCommand(prefs.getInt(PREF_AMBIENT_LEVEL, 4)));
-            } else if (PREF_EQ_PRESET.equals(config)) {
-                final int preset = Integer.parseInt(prefs.getString(PREF_EQ_PRESET, "0"));
-                if (preset == 255) {
-                    requestedEqPreset = -1;
-                    write(WRITE_CHARACTERISTIC_UUID, buildCustomEqCommand());
-                } else {
-                    requestedEqPreset = preset;
-                    write(WRITE_CHARACTERISTIC_UUID,
-                            buildPacket(CMD_EQ_SETTINGS_2, SUB_CMD_GET, (byte) preset));
-                }
             } else if (isEqBandPref(config)) {
-                requestedEqPreset = -1;
                 write(WRITE_CHARACTERISTIC_UUID, buildCustomEqCommand());
             } else if (PREF_SPATIAL_AUDIO.equals(config)) {
                 final int spatial = Integer.parseInt(prefs.getString(PREF_SPATIAL_AUDIO, "0"));
@@ -639,7 +622,6 @@ public class JblTuneBuds2Support extends AbstractDeviceSupport implements JblGat
 
     private byte[] buildCustomEqCommand() {
         final SharedPreferences prefs = GBApplication.getDeviceSpecificSharedPrefs(getDevice().getAddress());
-        prefs.edit().putString(PREF_EQ_PRESET, "255").apply();
         return buildEqSettingsCommand(EQ_CATEGORY_CUSTOMIZED, prefs);
     }
 
@@ -1137,21 +1119,6 @@ public class JblTuneBuds2Support extends AbstractDeviceSupport implements JblGat
 
         if (value[1] == CMD_EQ_SETTINGS_2) {
             parseEqSettings2Response(value);
-            return;
-        }
-        if (value[1] != CMD_EQ_PRESET && value[1] != 0x34) {
-            return;
-        }
-
-        final int presetIdx = value[value.length - 1] & 0xff;
-
-        LOG.info("JBL: EQ preset from device = {}", presetIdx);
-        final SharedPreferences prefs = GBApplication.getDeviceSpecificSharedPrefs(getDevice().getAddress());
-        final String currentVal = prefs.getString(PREF_EQ_PRESET, "0");
-        final String newVal = String.valueOf(presetIdx);
-        if (!newVal.equals(currentVal)) {
-            prefs.edit().putString(PREF_EQ_PRESET, newVal).apply();
-            getDevice().sendDeviceUpdateIntent(getContext());
         }
     }
 
@@ -1169,48 +1136,30 @@ public class JblTuneBuds2Support extends AbstractDeviceSupport implements JblGat
         }
 
         final int category = value[5] & 0xff;
-        final int requestedPreset = requestedEqPreset;
-        if (requestedPreset >= 0 && category != requestedPreset) {
+        if (category != EQ_CATEGORY_CUSTOMIZED) {
             return;
         }
-        final int preset = category == EQ_CATEGORY_CUSTOMIZED ? 255 : category;
         final int bandCount = payloadLength >= EQ_SETTINGS_HEADER_LENGTH ? value[19] & 0xff : 0;
-        final boolean completeSettings = payloadLength >= EQ_SETTINGS_HEADER_LENGTH
-                && payloadLength == EQ_SETTINGS_HEADER_LENGTH + bandCount * EQ_BAND_LENGTH;
+        if (payloadLength != EQ_SETTINGS_HEADER_LENGTH + bandCount * EQ_BAND_LENGTH) {
+            return;
+        }
+
         final SharedPreferences prefs = GBApplication.getDeviceSpecificSharedPrefs(getDevice().getAddress());
         final SharedPreferences.Editor editor = prefs.edit();
         boolean modified = false;
-        final String currentPreset = prefs.getString(PREF_EQ_PRESET, "0");
-        if (!String.valueOf(preset).equals(currentPreset)) {
-            editor.putString(PREF_EQ_PRESET, String.valueOf(preset));
-            modified = true;
-        }
-
-        if (category == EQ_CATEGORY_CUSTOMIZED && completeSettings) {
-            final ByteBuffer data = ByteBuffer.wrap(value).order(ByteOrder.LITTLE_ENDIAN);
-            for (int i = 0; i < bandCount; i++) {
-                final int bandOffset = 20 + i * EQ_BAND_LENGTH;
-                final float gain = data.getFloat(bandOffset + 1);
-                final float frequency = data.getFloat(bandOffset + 5);
-                final int preferenceIndex = findEqBandPreference(frequency);
-                if (preferenceIndex >= 0) {
-                    final int gainDb = Math.max(-6, Math.min(6, Math.round(gain)));
-                    if (prefs.getInt(EQ_BAND_PREFS[preferenceIndex], 0) != gainDb) {
-                        editor.putInt(EQ_BAND_PREFS[preferenceIndex], gainDb);
-                        modified = true;
-                    }
+        final ByteBuffer data = ByteBuffer.wrap(value).order(ByteOrder.LITTLE_ENDIAN);
+        for (int i = 0; i < bandCount; i++) {
+            final int bandOffset = 20 + i * EQ_BAND_LENGTH;
+            final float gain = data.getFloat(bandOffset + 1);
+            final float frequency = data.getFloat(bandOffset + 5);
+            final int preferenceIndex = findEqBandPreference(frequency);
+            if (preferenceIndex >= 0) {
+                final int gainDb = Math.max(-6, Math.min(6, Math.round(gain)));
+                if (prefs.getInt(EQ_BAND_PREFS[preferenceIndex], 0) != gainDb) {
+                    editor.putInt(EQ_BAND_PREFS[preferenceIndex], gainDb);
+                    modified = true;
                 }
             }
-        }
-
-        if (category == requestedPreset) {
-            final byte[] settings = completeSettings
-                    ? buildEqSettingsCommand(value, payloadLength, responseType)
-                    : buildEqSettingsCommand(category, null);
-            if (requestedEqPreset == requestedPreset) {
-                requestedEqPreset = -1;
-            }
-            write(WRITE_CHARACTERISTIC_UUID, settings);
         }
 
         if (modified) {
