@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <PreferenceCategory android:title="@string/prefs_noise_control">
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/jbl_tune_buds_2_sound_mode_entries"
+            android:entryValues="@array/jbl_tune_buds_2_sound_mode_values"
+            android:icon="@drawable/ic_hearing"
+            android:key="pref_jbl_tune_buds_2_sound_mode"
+            android:title="@string/prefs_noise_control"
+            app:useSimpleSummaryProvider="true" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:icon="@drawable/ic_hearing"
+            android:key="pref_jbl_tune_buds_2_adaptive_anc"
+            android:summary="@string/pref_adaptive_noise_cancelling_summary"
+            android:title="@string/pref_adaptive_noise_cancelling_title" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="true"
+            android:icon="@drawable/ic_hearing"
+            android:key="pref_jbl_tune_buds_2_auto_compensation"
+            android:summary="@string/pref_leakage_compensation_summary"
+            android:title="@string/pref_leakage_compensation" />
+
+        <SeekBarPreference
+            android:defaultValue="4"
+            android:icon="@drawable/ic_hearing"
+            android:key="pref_jbl_tune_buds_2_anc_level"
+            android:max="7"
+            android:title="@string/prefs_active_noise_cancelling_level"
+            app:min="1"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:defaultValue="4"
+            android:icon="@drawable/ic_surround"
+            android:key="pref_jbl_tune_buds_2_ambient_level"
+            android:max="7"
+            android:title="@string/pref_transparency_level"
+            app:min="1"
+            app:showSeekBarValue="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_header_audio">
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/jbl_tune_buds_2_eq_preset_entries"
+            android:entryValues="@array/jbl_tune_buds_2_eq_preset_values"
+            android:icon="@drawable/ic_equalizer"
+            android:key="pref_jbl_tune_buds_2_eq_preset"
+            android:title="@string/prefs_equalizer_preset"
+            app:useSimpleSummaryProvider="true" />
+
+        <!-- 10-Band Custom Equalizer -->
+        <SeekBarPreference
+            android:defaultValue="0"
+            android:key="pref_jbl_tune_buds_2_eq_band_32"
+            android:max="6"
+            android:title="32 Hz"
+            app:min="-6"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:defaultValue="0"
+            android:key="pref_jbl_tune_buds_2_eq_band_64"
+            android:max="6"
+            android:title="64 Hz"
+            app:min="-6"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:defaultValue="0"
+            android:key="pref_jbl_tune_buds_2_eq_band_125"
+            android:max="6"
+            android:title="125 Hz"
+            app:min="-6"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:defaultValue="0"
+            android:key="pref_jbl_tune_buds_2_eq_band_250"
+            android:max="6"
+            android:title="250 Hz"
+            app:min="-6"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:defaultValue="0"
+            android:key="pref_jbl_tune_buds_2_eq_band_500"
+            android:max="6"
+            android:title="500 Hz"
+            app:min="-6"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:defaultValue="0"
+            android:key="pref_jbl_tune_buds_2_eq_band_1k"
+            android:max="6"
+            android:title="1 kHz"
+            app:min="-6"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:defaultValue="0"
+            android:key="pref_jbl_tune_buds_2_eq_band_2k"
+            android:max="6"
+            android:title="2 kHz"
+            app:min="-6"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:defaultValue="0"
+            android:key="pref_jbl_tune_buds_2_eq_band_4k"
+            android:max="6"
+            android:title="4 kHz"
+            app:min="-6"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:defaultValue="0"
+            android:key="pref_jbl_tune_buds_2_eq_band_8k"
+            android:max="6"
+            android:title="8 kHz"
+            app:min="-6"
+            app:showSeekBarValue="true" />
+
+        <SeekBarPreference
+            android:defaultValue="0"
+            android:key="pref_jbl_tune_buds_2_eq_band_16k"
+            android:max="6"
+            android:title="16 kHz"
+            app:min="-6"
+            app:showSeekBarValue="true" />
+
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/jbl_tune_buds_2_spatial_audio_entries"
+            android:entryValues="@array/jbl_tune_buds_2_spatial_audio_values"
+            android:icon="@drawable/ic_surround"
+            android:key="pref_jbl_tune_buds_2_spatial_audio"
+            android:title="@string/pref_spatial_audio"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/jbl_tune_buds_2_latency_mode_entries"
+            android:entryValues="@array/jbl_tune_buds_2_latency_mode_values"
+            android:icon="@drawable/ic_volume_up"
+            android:key="pref_jbl_tune_buds_2_latency_mode"
+            android:title="@string/pref_latency_mode"
+            app:useSimpleSummaryProvider="true" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:icon="@drawable/ic_hearing"
+            android:key="pref_jbl_tune_buds_2_safe_sound"
+            android:summary="@string/pref_safe_sound_summary"
+            android:title="@string/pref_safe_sound" />
+
+        <SeekBarPreference
+            android:defaultValue="0"
+            android:icon="@drawable/ic_surround"
+            android:key="pref_jbl_tune_buds_2_channel_balance"
+            android:max="10"
+            android:title="@string/pref_channel_balance"
+            app:min="-10"
+            app:showSeekBarValue="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/prefs_touch_lock_buds2">
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/jbl_tune_buds_2_gesture_entries"
+            android:entryValues="@array/jbl_tune_buds_2_gesture_values"
+            android:icon="@drawable/ic_hearing"
+            android:key="pref_jbl_tune_buds_2_gesture_left"
+            android:title="@string/left_earbud"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            android:defaultValue="2"
+            android:entries="@array/jbl_tune_buds_2_gesture_entries"
+            android:entryValues="@array/jbl_tune_buds_2_gesture_values"
+            android:icon="@drawable/ic_hearing"
+            android:key="pref_jbl_tune_buds_2_gesture_right"
+            android:title="@string/right_earbud"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            android:defaultValue="9"
+            android:entries="@array/jbl_tune_buds_2_asc_cycle_entries"
+            android:entryValues="@array/jbl_tune_buds_2_asc_cycle_values"
+            android:icon="@drawable/ic_surround"
+            android:key="pref_jbl_tune_buds_2_asc_cycle"
+            android:title="@string/pref_jbl_tune_buds_2_asc_cycle"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/phone_calls">
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/jbl_tune_buds_2_call_sound_effect_entries"
+            android:entryValues="@array/jbl_tune_buds_2_call_sound_effect_values"
+            android:icon="@drawable/ic_equalizer"
+            android:key="pref_jbl_tune_buds_2_call_sound_effect"
+            android:title="@string/pref_call_sound_effect"
+            app:useSimpleSummaryProvider="true" />
+
+        <SwitchPreferenceCompat
+            android:defaultValue="false"
+            android:icon="@drawable/ic_volume_up"
+            android:key="pref_jbl_tune_buds_2_call_volume_optimizer"
+            android:summary="@string/pref_call_volume_optimizer_summary"
+            android:title="@string/pref_call_volume_optimizer" />
+
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/jbl_tune_buds_2_sidetone_entries"
+            android:entryValues="@array/jbl_tune_buds_2_sidetone_values"
+            android:icon="@drawable/ic_phone"
+            android:key="pref_jbl_tune_buds_2_sidetone"
+            android:title="@string/pref_sidetone"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_header_system">
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/jbl_tune_buds_2_voice_prompt_entries"
+            android:entryValues="@array/jbl_tune_buds_2_voice_prompt_values"
+            android:icon="@drawable/ic_volume_up"
+            android:key="pref_jbl_tune_buds_2_voice_prompts"
+            android:title="@string/pref_voice_prompts"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            android:defaultValue="0"
+            android:entries="@array/jbl_tune_buds_2_auto_off_entries"
+            android:entryValues="@array/jbl_tune_buds_2_auto_off_values"
+            android:icon="@drawable/ic_timer"
+            android:key="pref_jbl_tune_buds_2_auto_power_off"
+            android:title="@string/soundcore_auto_power_off_title"
+            app:useSimpleSummaryProvider="true" />
+    </PreferenceCategory>
+</androidx.preference.PreferenceScreen>
