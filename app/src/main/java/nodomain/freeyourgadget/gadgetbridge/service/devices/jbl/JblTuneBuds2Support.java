@@ -719,7 +719,8 @@ public class JblTuneBuds2Support extends AbstractDeviceSupport implements JblGat
 
     private byte[] buildVoicePromptsCommand(final int vpType) {
         LOG.info("JBL Tune Buds 2: Setting Voice Prompts: {}", vpType);
-        return buildPacket(CMD_VOICE_PROMPTS, (byte) 0x03, (byte) (vpType != 0 ? 1 : 0));
+        final boolean language = vpType == VOICE_PROMPT_LANGUAGE;
+        return buildPacket(CMD_VOICE_PROMPTS, (byte) 0x03, (byte) (language ? 1 : 0));
     }
 
     private byte[] buildGestureCommand(final boolean isLeft, final int role) {
