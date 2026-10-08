@@ -16,6 +16,8 @@ import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.Looper;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresPermission;
@@ -132,6 +134,17 @@ public class JblTuneBuds2Support extends AbstractDeviceSupport implements JblGat
     private boolean disposed;
     private boolean servicesDiscovered = false;
 
+    private static final long EQ_WRITE_DELAY_MS = 200L;
+
+    private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
+    private final Runnable writeCustomEq = new Runnable() {
+        @Override
+        public void run() {
+            write(WRITE_CHARACTERISTIC_UUID, buildCustomEqCommand());
+        }
+    };
+
     public JblTuneBuds2Support() {
         super();
         setAutoReconnect(true);
@@ -241,6 +254,7 @@ public class JblTuneBuds2Support extends AbstractDeviceSupport implements JblGat
     @Override
     public synchronized void dispose() {
         disposed = true;
+        mainHandler.removeCallbacks(writeCustomEq);
         if (addressScanner != null) {
             addressScanner.cancel();
             addressScanner = null;
@@ -516,7 +530,8 @@ public class JblTuneBuds2Support extends AbstractDeviceSupport implements JblGat
                 write(WRITE_CHARACTERISTIC_UUID,
                         buildAmbientLevelCommand(prefs.getInt(PREF_AMBIENT_LEVEL, 4)));
             } else if (isEqBandPref(config)) {
-                write(WRITE_CHARACTERISTIC_UUID, buildCustomEqCommand());
+                mainHandler.removeCallbacks(writeCustomEq);
+                mainHandler.postDelayed(writeCustomEq, EQ_WRITE_DELAY_MS);
             } else if (PREF_SPATIAL_AUDIO.equals(config)) {
                 final int spatial = Integer.parseInt(prefs.getString(PREF_SPATIAL_AUDIO, "0"));
                 write(WRITE_CHARACTERISTIC_UUID, buildSpatialAudioCommand(spatial));
