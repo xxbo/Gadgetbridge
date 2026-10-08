@@ -14,8 +14,7 @@ import androidx.annotation.NonNull;
 import java.util.regex.Pattern;
 
 import nodomain.freeyourgadget.gadgetbridge.R;
-import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettings;
-import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.DeviceSpecificSettingsCustomizer;
+import nodomain.freeyourgadget.gadgetbridge.activities.devicesettings.dsl.DeviceSettingsSpec;
 import nodomain.freeyourgadget.gadgetbridge.devices.DeviceCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.devices.generic_headphones.GenericHeadphonesCoordinator;
 import nodomain.freeyourgadget.gadgetbridge.impl.GBDevice;
@@ -96,31 +95,8 @@ public class JblTuneBuds2Coordinator extends GenericHeadphonesCoordinator {
     }
 
     @Override
-    public DeviceSpecificSettings getDeviceSpecificSettings(@NonNull final GBDevice device) {
-        final DeviceSpecificSettings settings = new DeviceSpecificSettings();
-        settings.addRootScreen(R.xml.devicesettings_jbl_tune_buds_2);
-        settings.addConnectedPreferences(
-                JblTuneBuds2Support.PREF_SOUND_MODE,
-                JblTuneBuds2Support.PREF_EQ_PRESET,
-                JblTuneBuds2Support.PREF_SPATIAL_AUDIO,
-                JblTuneBuds2Support.PREF_LATENCY_MODE,
-                JblTuneBuds2Support.PREF_CALL_SOUND_EFFECT,
-                JblTuneBuds2Support.PREF_CALL_VOLUME_OPTIMIZER,
-                JblTuneBuds2Support.PREF_SIDETONE,
-                JblTuneBuds2Support.PREF_AUTO_POWER_OFF,
-                JblTuneBuds2Support.PREF_SAFE_SOUND,
-                JblTuneBuds2Support.PREF_CHANNEL_BALANCE,
-                JblTuneBuds2Support.PREF_GESTURE_LEFT,
-                JblTuneBuds2Support.PREF_GESTURE_RIGHT,
-                JblTuneBuds2Support.PREF_ASC_CYCLE,
-                JblTuneBuds2Support.PREF_VOICE_PROMPTS
-        );
-        return settings;
-    }
-
-    @Override
-    public DeviceSpecificSettingsCustomizer getDeviceSpecificSettingsCustomizer(@NonNull final GBDevice device) {
-        return new JblTuneBuds2SettingsCustomizer(device);
+    public DeviceSettingsSpec getDeviceSettings(@NonNull final GBDevice device) {
+        return JblTuneBuds2SettingsKt.jblTuneBuds2Settings();
     }
 
     @Override

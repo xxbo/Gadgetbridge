@@ -3768,6 +3768,16 @@
     <string name="pref_jbl_tune_buds_2_asc_cycle_anc_ambient">Noise Cancelling / Ambient Aware</string>
     <string name="pref_jbl_tune_buds_2_asc_cycle_anc_off">Noise Cancelling / Off</string>
     <string name="pref_jbl_tune_buds_2_asc_cycle_ambient_off">Ambient Aware / Off</string>
+    <string name="jbl_tune_buds_2_equalizer_band_32">32 Hz</string>
+    <string name="jbl_tune_buds_2_equalizer_band_64">64 Hz</string>
+    <string name="jbl_tune_buds_2_equalizer_band_125">125 Hz</string>
+    <string name="jbl_tune_buds_2_equalizer_band_250">250 Hz</string>
+    <string name="jbl_tune_buds_2_equalizer_band_500">500 Hz</string>
+    <string name="jbl_tune_buds_2_equalizer_band_1k">1 kHz</string>
+    <string name="jbl_tune_buds_2_equalizer_band_2k">2 kHz</string>
+    <string name="jbl_tune_buds_2_equalizer_band_4k">4 kHz</string>
+    <string name="jbl_tune_buds_2_equalizer_band_8k">8 kHz</string>
+    <string name="jbl_tune_buds_2_equalizer_band_16k">16 kHz</string>
     <string name="pref_transparency_ambient">Transparency (Ambient)</string>
     <string name="pref_transparency_level">Transparency level</string>
     <string name="pref_talk_thru">TalkThru (Conversation)</string>
