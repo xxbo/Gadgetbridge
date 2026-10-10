@@ -1,122 +1,83 @@
-Gadgetbridge is hosted on [codeberg.org](https://codeberg.org/Freeyourgadget/Gadgetbridge/).
+# Furry Pixel Badge · 像素兽设电子社交卡
 
+把兽设、社交二维码和真实手环数据放进一张会动的像素角色卡，带去漫展认识新朋友。
 
-Gadgetbridge
-============
+这是基于 [Gadgetbridge](https://codeberg.org/Freeyourgadget/Gadgetbridge) 开发的 Android 个人定制分支。开发重点是漫展场景下的角色展示、社交互动和活动数据展示，同时保留上游的设备连接与数据管理功能。
 
-Gadgetbridge is an Android application which will allow you to use your
-Bluetooth gadgets (mostly wearables like smart watches, but many more) without the vendor's closed source application
-and without the need to create an account and transmit any of your data to the
-vendor's servers.
+> 当前处于开发阶段。以下为本地开发版本已实现的功能，功能源码将随后续提交同步；上游发行版不包含本分支的定制页面。
 
-[Homepage](https://gadgetbridge.org) - [Blog](https://blog.freeyourgadget.org) - <a rel="me" href="https://social.anoxinon.de/@gadgetbridge">Mastodon</a>
+## 已实现功能
 
-[![Donate](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/Gadgetbridge/donate)
+| 模块 | 功能 |
+| --- | --- |
+| 角色社交卡 | 可编辑兽名、相册头像与社交二维码；点击二维码放大扫码 |
+| 生命体征 | 实时心率与采样趋势曲线；最近有效的血氧、HRV 值 |
+| 今日探索 | 当天已同步步数、自定义目标、进度条、探索称号和像素小兽 |
+| 小兽互动 | 牛、龙、狼、狐、猫、犬；眨眼、摇尾、抖耳、蹦跳；连点飘出“好感 +1” |
+| 社交状态 | 可集邮、欢迎扩列、休息中、欢迎贴贴、正在逛展 |
+| 主题配色 | 霓虹像素、苍蓝鎏金、樱花梦境、森林精灵 |
+| 展示模式 | 隐藏操作按钮，保留扫码和小兽互动；长按进入或退出 |
 
+兽名、图片、物种、社交状态、主题和步数目标保存在手机本地。好感飘字目前是互动效果，没有累计等级系统。
 
-[![Translate](https://hosted.weblate.org/widgets/freeyourgadget/-/gadgetbridge/svg-badge.svg)](https://hosted.weblate.org/projects/freeyourgadget/gadgetbridge)
+## 使用方式
 
-## Download
+1. 安装本分支构建的应用，完成手环配对与连接。
+2. 从侧边菜单进入“生命体征”页面。
+3. 点击标题编辑兽名、点击头像选择图片；通过 `MENU +` 设置二维码、物种、主题等。
+4. 点击底部社交状态切换状态，点击小兽触发互动。
+5. 点击“今日探索”设置步数目标，默认 **15,000 步**。
+6. 开启展示模式用于现场展示，长按画面退出后继续编辑。
 
-<a href="https://f-droid.org/app/nodomain.freeyourgadget.gadgetbridge">
-    <img alt="Get it on F-Droid" src="https://gadgetbridge.org/assets/static/get-it-on-fdroid.png" height="60">
-</a>
+`SYNC` 请求同步手环活动记录。`DEMO` 用于预览布局，开启后右上角显示 `DEMO`；示例数值不会写入手环数据。
 
-<a href="https://apt.izzysoft.de/fdroid/index/apk/nodomain.freeyourgadget.gadgetbridge">
-    <img alt="Get it on IzzyOnDroid" src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroidButtonGreyBorder_nofont.png" height="60">
-</a>
+## 数据与设备支持
 
-<a href="https://codeberg.org/Freeyourgadget/Gadgetbridge/releases/">
-    <img alt="Get it on Codeberg" src="https://get-it-on.codeberg.org/get-it-on-white-on-black.png" height="60">
-</a>
-<br><br>
+目前围绕 **HUAWEI Band 11 Pro** 开发并进行实机验证，包含连接稳定性修复和实时心率协议接入。其他设备能否提供相同数据，取决于上游支持和对应协议实现。
 
-[<img src="https://shields.rbtlog.dev/simple/nodomain.freeyourgadget.gadgetbridge" alt="RB Status">](https://shields.rbtlog.dev/nodomain.freeyourgadget.gadgetbridge)
+- **心率**：来自手环实时上报，过滤无效样本；约 15 秒没有有效更新时显示 `--`。
+- **血氧 / HRV**：最近有效测量值，不代表秒级实时测量。
+- **今日步数**：按手机本地当天统计已同步活动样本，每约 15 秒重新读取；没有当天有效样本时显示“等待同步”。不保证与手环屏幕同时刷新。
+- **曲线与动画**：曲线展示心率采样趋势，并非心电图；爱心跳动是根据心率驱动的装饰动画。
 
-- [Nightly releases](https://freeyourgadget.codeberg.page/fdroid/repo?fingerprint=CD381ECCC465AB324E21BCC335895615E07E70EE11E9FD1DF3C020C5194F00B2)
-    - Nightly releases are updated more frequently and may be less stable than standard releases, and they are distributed by our F-Droid repository unlike standard releases. 
-- [List of changes](https://codeberg.org/Freeyourgadget/Gadgetbridge/src/master/CHANGELOG.md)
+## 构建与开发
 
-## Supported Devices
+使用项目自带的 Gradle Wrapper，配置 JDK 21 和项目所需的 Android SDK。
 
-Please see the [Gadgets](https://gadgetbridge.org/gadgets/) page on the website for a complete list of supported devices.
+```sh
+# Windows
+./gradlew.bat :app:assembleMainlineDebug
 
-## Features
+# Linux / macOS
+./gradlew :app:assembleMainlineDebug
+```
 
-Please see the [Features](https://gadgetbridge.org/basics/features/) page on the website.
+Windows 下运行 `gradlew.bat`（PowerShell 中使用 `./gradlew.bat`）。APK 输出：
 
-## Authors
-### Core Team (in order of first code contribution)
+```text
+app/build/outputs/apk/mainline/debug/app-mainline-debug.apk
+```
 
-* Andreas Shimokawa
-* Carsten Pfeiffer
-* Daniele Gobbetti
-* Petr Vaněk
+主要实现入口：
 
-### Additional contributors
-* João Paulo Barraca (HPlus)
-* Vitaly Svyastyn (NO.1 F1)
-* Sami Alaoui (Teclast H30)
-* "ladbsoft" (XWatch)
-* Sebastian Kranz (ZeTime)
-* Vadim Kaushan (ID115)
-* "maxirnilian" (Lenovo Watch 9)
-* "ksiwczynski", "mkusnierz", "mamutcho" (Lenovo Watch X Plus)
-* Andreas Böhler (Casio)
-* Jean-François Greffier (Mi Scale 2)
-* Johannes Schmitt (BFH-16)
-* Lukas Schwichtenberg (Makibes HR3)
-* Daniel Dakhno (Fossil Q Hybrid, Fossil Hybrid HR)
-* Gordon Williams (Bangle.js)
-* Pavel Elagin (JYou Y5)
-* Taavi Eomäe (iTag)
-* Erik Bloß (TLW64)
-* Yukai Li (Lefun)
-* José Rebelo (Roidmi, Sony Headphones, Miband 7)
-* Arjan Schrijver (Fossil Hybrid HR watchfaces)
+- [VitalSignsActivity.java](app/src/main/java/nodomain/freeyourgadget/gadgetbridge/activities/VitalSignsActivity.java)：像素界面、社交卡、角色动画、主题和探索卡片。
+- [HrRriTest.java](app/src/main/java/nodomain/freeyourgadget/gadgetbridge/devices/huawei/packets/HrRriTest.java)：华为实时心率指令与数据解析。
+- [HuaweiSupportProvider.java](app/src/main/java/nodomain/freeyourgadget/gadgetbridge/service/devices/huawei/HuaweiSupportProvider.java)：测量请求和实时数据处理。
 
-## Contribute
+## 后续方向
 
-See CONTRIBUTING.md for the contribution policy of Gadgetbridge.
+- 验证步数同步表现，完善漫展活动数据展示。
+- 增加探索里程碑反馈和更丰富的角色动作。
+- 继续完善不同设备的数据支持。
 
-Contributions are welcome, be it feedback, bug reports, documentation, translation, research or code. Feel free to work
-on any of the open [issues](https://codeberg.org/Freeyourgadget/Gadgetbridge/issues);
-just leave a comment that you're working on one to avoid duplicated work.
+## 上游与许可
 
-[Developer documentation](https://gadgetbridge.org/internals/development/project-overview/) - [Support for a new Device](https://gadgetbridge.org/internals/topics/support/) - [New Device Tutorial](https://gadgetbridge.org/internals/development/new-gadget/)
+感谢 Gadgetbridge 团队及所有贡献者。本项目是个人定制分支，与官方项目没有隶属关系。
 
-Translations can be contributed via https://hosted.weblate.org/projects/freeyourgadget/gadgetbridge/
+- [Gadgetbridge 官方仓库](https://codeberg.org/Freeyourgadget/Gadgetbridge)
+- [Gadgetbridge 官网](https://gadgetbridge.org)
+- [保留的上游 README、作者与贡献说明](README.upstream.md)
+- [贡献指南](CONTRIBUTING.md)
+- [许可证](LICENSE)
 
-## Community
-
-If you would like to get in touch with other Gadgetbridge users and developers outside of Codeberg, you can do so via:
-* Matrix: [`#gadgetbridge:matrix.org`](https://matrix.to/#/#gadgetbridge:matrix.org)
-
-## Do you have further questions or feedback?
-
-Feel free to open an issue on our issue tracker, but please:
-- do not use the issue tracker as a forum, do not ask for ETAs and read the issue conversation before posting
-- use the search functionality to ensure that your question wasn't already answered. Don't forget to check the **closed** issues as well!
-- remember that this is a community project, people are contributing in their free time because they like doing so: don't take the fun away! Be kind and constructive.
-- Do not ask for help regarding your own projects, unless they are Gadgetbridge related
-
-## Having problems?
-
-0. Phone crashing during device discovery? Disable Privacy Guard (or similarly named functionality) during discovery.
-1. Open Gadgetbridge's settings and check the option to write log files
-2. Reproduce the problem you encountered
-3. Check the logfile at /sdcard/Android/data/nodomain.freeyourgadget.gadgetbridge/files/gadgetbridge.log
-4. File an issue at https://codeberg.org/Freeyourgadget/Gadgetbridge/issues/new/choose and possibly provide the logfile
-
-Alternatively you may use the standard logcat functionality to access the log.
-
-## Code Licenses
-
-* Gadgetbridge is licensed under the [AGPLv3](LICENSE)
-* Files in app/src/main/java/net/osmand/ and app/src/main/aidl/net/osmand/ are taken from the [OsmAnd](https://osmand.net/) project, licensed under the GPLv3 by OsmAnd BV
-* Files in app/src/main/java/org/bouncycastle are taken from the [Bouncy Castle](https://www.bouncycastle.org/java.html) project, licensed under the MIT license by The Legion of the Bouncy Castle Inc.
-* Files in app/src/main/java/com/android/nQuant are taken from the [nQuant.android](https://github.com/mcychan/nQuant.android/) project, licensed under the Apache license by Miller Cy Chan
-* Files in app/src/main/java/lineageos/ are taken from the [LineageOS](https://lineageos.org/) platform (formerly CyanogenMod), licensed under the Apache license by The CyanogenMod Project and LineageOS contributors
-* Files in app/src/main/java/org/concentus are taken from the [Concentus](https://github.com/lostromb/concentus) project, licensed under the BSD-3 license by various holding parties
-* Files in GBDaoGenerator/src/de/greenrobot are taken from the [greenDAO](https://codeberg.org/Freeyourgadget/greenDAO) project (Gadgetbridge's fork), licensed under the GPLv3 by Markus Junginger, greenrobot
-* File app/src/main/java/nodomain/freeyourgadget/gadgetbridge/util/SearchPreferenceHighlighter.java is taken from [SearchPreference](https://github.com/ByteHamster/SearchPreference), licensed under the MIT license by ByteHamster
+代码遵循仓库现有许可及各文件的许可声明。头像、二维码和其他角色素材的权利归各自权利人所有。
